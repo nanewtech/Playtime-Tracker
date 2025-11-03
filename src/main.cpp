@@ -1,18 +1,17 @@
+#include <ctime>
 #include <Geode/Geode.hpp>
-
+#include <Geode/modify/LevelInfoLayer.hpp>
+#include <Geode/modify/PauseLayer.hpp>
+#include <Geode/modify/PlayLayer.hpp>
 
 using namespace geode::prelude;
 
-
-#include <Geode/modify/LevelInfoLayer.hpp>
 class $modify(ptLevelInfoLayer, LevelInfoLayer) {
 
 
 
 	bool init(GJGameLevel * level, bool challenge) {
-		GJGameLevel* currlevel;
 		if (!LevelInfoLayer::init(level, challenge)) {
-			currlevel = level;
 			return false;
 		}
 		auto savedir = Mod::get()->getSaveDir();
@@ -54,9 +53,56 @@ class $modify(ptLevelInfoLayer, LevelInfoLayer) {
 
 		btn->setScale(0.8f);
 
-		FLAlertLayer::create("Playtime Tracker",
-			CCString::createWithFormat(
-				"%d", id)->getCString(),
+		FLAlertLayer::create(
+			"Playtime Tracker",
+			CCString::createWithFormat("%d", id)->getCString(),
 			"Close")->show();
 	}
+};
+
+class $modify(ptPauseLayer, PauseLayer) {
+	
+	void customSetup(){
+		PauseLayer::customSetup();
+
+		auto ptButton = CCMenuItemSpriteExtra::create(
+			CCSprite::createWithSpriteFrameName("GJ_likeBtn_001.png"),
+			this,
+			menu_selector(ptPauseLayer::onPtButton)
+		);
+
+		auto menu = this->getChildByID("left-button-menu");
+		ptButton->setID("playtime-tracker-button");
+		ptButton->setScale(0.7f);
+		menu->addChild(ptButton);
+
+		menu->updateLayout();
+
+	}
+
+	void onPtButton(CCObject* sender) {
+		
+		auto btn = static_cast<CCMenuItemSpriteExtra*>(sender);
+
+		btn->setScale(0.7f);
+
+		FLAlertLayer::create(
+			"Playtime Tracker",
+			"test text",
+			"close")->show();
+	}
+};
+class $modify(ptPlayLayer, PlayLayer) {
+
+	bool init(GJGameLevel* level, bool useReplay, bool dontCreateObjects) {
+		if (!PlayLayer::init(level, useReplay, dontCreateObjects)) {
+			return false;
+		}
+		time_t timestamp;
+		log::debug("STARTED LEVEL AT: {}", fmt::to_string(time(&timestamp)));
+
+		return true;
+	}
+
+
 };
