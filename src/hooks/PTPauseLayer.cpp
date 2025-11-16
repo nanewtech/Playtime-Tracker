@@ -14,6 +14,8 @@ class $modify(PTPauseLayer, PauseLayer) {
 		time_t timestamp;
 		log::debug("PAUSED AT: {}", fmt::to_string(time(&timestamp)));
 
+		data::pauseLevel(Mod::get()->getSavedValue<int>("current-level-id"));
+
 		auto ptButton = CCMenuItemSpriteExtra::create(
 			CCSprite::createWithSpriteFrameName("GJ_likeBtn_001.png"),
 			this,
@@ -32,12 +34,19 @@ class $modify(PTPauseLayer, PauseLayer) {
 
 		time_t timestamp;
 		log::debug("QUIT AT: {}", fmt::to_string(time(&timestamp)));
+
+		data::exitLevel(Mod::get()->getSavedValue<int>("current-level-id"));
+
 		PauseLayer::onQuit(sender);
 	}
 
 	void onResume(CCObject * sender) {
 		time_t timestamp;
 		log::debug("RESUMED AT: {}", fmt::to_string(time(&timestamp)));
+
+		data::resumeLevel(Mod::get()->getSavedValue<int>("current-level-id"));
+
+
 		PauseLayer::onResume(sender);
 	}
 	void onPtButton(CCObject * sender) {

@@ -8,7 +8,7 @@
 	},
 	"id": "nanew.playtime-tracker",
 	"name": "Playtime Tracker",
-	"version": "v0.2.0",
+	"version": "v0.3.0",
 	"developer": "nanew",
 	"description": "A mod which tracks your playtime on levels",
 	"dependencies": {

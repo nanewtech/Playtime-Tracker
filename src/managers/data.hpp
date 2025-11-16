@@ -3,10 +3,15 @@
 
 class data {
 public : 
-	static void initializeFile();
 
-	static bool fileExists();
+	static void initializeLevel(int levelID);
 
-	static void addStart(int levelID);
+	static void startLevel(int levelID);
+
+	static void pauseLevel(int levelID);
+
+	static void resumeLevel(int levelID);
+
+	static void exitLevel(int levelID);
 };
 #endif // !data_h

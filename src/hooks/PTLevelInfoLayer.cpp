@@ -9,7 +9,7 @@ using namespace geode::prelude;
 
 class $modify(PTLevelInfoLayer, LevelInfoLayer) {
 
-
+	
 
 	bool init(GJGameLevel * level, bool challenge) {
 		if (!LevelInfoLayer::init(level, challenge)) {
@@ -54,7 +54,7 @@ class $modify(PTLevelInfoLayer, LevelInfoLayer) {
 
 		btn->setScale(0.8f);
 
-		data::addStart(id);
+		data::initializeLevel(id);
 
 
 		FLAlertLayer::create(

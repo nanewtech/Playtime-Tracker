@@ -14,7 +14,13 @@ class $modify(PTPlayLayer, PlayLayer) {
 			return false;
 		}
 		time_t timestamp;
+		int levelID = level->m_levelID.value();
+
 		log::debug("STARTED LEVEL AT: {}", fmt::to_string(time(&timestamp)));
+		
+		Mod::get()->setSavedValue<int>("current-level-id", levelID);
+
+		data::startLevel(levelID);
 
 		return true;
 	}
