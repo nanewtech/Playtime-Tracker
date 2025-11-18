@@ -8,7 +8,7 @@
 	},
 	"id": "nanew.playtime-tracker",
 	"name": "Playtime Tracker",
-	"version": "v0.3.0",
+	"version": "v0.6.0",
 	"developer": "nanew",
 	"description": "A mod which tracks your playtime on levels",
 	"dependencies": {
@@ -18,11 +18,35 @@
 		"remove-pauses": {
 			"type": "bool",
 			"name": "Remove pauses from Playtime",
-			"description": "If enabled, removes the time you spend in the pause menu from your total playtime",
+			"description": "If enabled, removes the time you spend in the pause menu from your playtime. This also removes the time you spend at the 'Level Complete' screen",
 			"default":true
+		},
+		"short-text":{
+			"type": "bool",
+			"name": "Use short playtime text",
+			"description": "If enabled, uses a short version of the playtime, e.g. Xd Xh Xm Xs. When disabled, writes out the formats, e.g. X Days, X Hours, X Minutes, X Seconds.",
+			"default":false
+		},
+		"highest-convert":{
+			"type": "string",
+			"name": "Convert playtime up to",
+			"description": "Whenever you check your playtime, the mod will convert it up to the selected unit, e.g. if you select \"Hours\", you will see your playtime converted to hours, minutes and seconds whereas if you select \"Days\", you get your playtime converted to days, hours, minutes and seconds.",
+			"one-of": ["Days", "Hours", "Minutes", "Seconds"],
+			"default": "Days"
+		},
+		"infoLayer-position":{
+			"type": "string",
+			"name": "Menu button position",
+			"description": "Decide if the button on the level info page should appear above the favorites or on the left side of the screen.",
+			"one-of": ["Bottom", "Left"],
+			"default": "Bottom"
 		}
 	},
 	"links": {
 		"source": "https://github.com/nanewtech/Playtime-Tracker"
+	},
+	"tags": ["offline", "utility"],
+	"resources": {
+		"sprites": ["resources/playtimeButton.png"]
 	}
 }

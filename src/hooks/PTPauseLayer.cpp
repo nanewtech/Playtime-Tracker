@@ -3,61 +3,67 @@
 #include <Geode/modify/PauseLayer.hpp>
 
 #include "../managers/data.hpp"
+#include "../managers/settings.hpp"
 
 using namespace geode::prelude;
 
 class $modify(PTPauseLayer, PauseLayer) {
-
+	struct Fields {
+		int m_levelID = 1;
+	};
 	void customSetup() {
 		PauseLayer::customSetup();
+
+		m_fields->m_levelID = Mod::get()->getSavedValue<int>("current-level-id");
 
 		time_t timestamp;
 		log::debug("PAUSED AT: {}", fmt::to_string(time(&timestamp)));
 
-		data::pauseLevel(Mod::get()->getSavedValue<int>("current-level-id"));
+		data::pauseLevel(m_fields->m_levelID);
+		auto sprite = CCSprite::create("playtimeButton.png"_spr);
+		sprite->setScale(0.8f);
 
 		auto ptButton = CCMenuItemSpriteExtra::create(
-			CCSprite::createWithSpriteFrameName("GJ_likeBtn_001.png"),
+			sprite,
 			this,
 			menu_selector(PTPauseLayer::onPtButton)
 		);
 
 		auto menu = this->getChildByID("left-button-menu");
 		ptButton->setID("playtime-tracker-button");
-		ptButton->setScale(0.7f);
 		menu->addChild(ptButton);
 
 		menu->updateLayout();
 
-	}
+	} /*
 	void onQuit(CCObject * sender) {
 
 		time_t timestamp;
 		log::debug("QUIT AT: {}", fmt::to_string(time(&timestamp)));
-
-		data::exitLevel(Mod::get()->getSavedValue<int>("current-level-id"));
+		log::debug("PauseLayer onQuit() CALLED!!!!");
+		data::exitLevel(m_fields->m_levelID);
 
 		PauseLayer::onQuit(sender);
 	}
-
+	*/
 	void onResume(CCObject * sender) {
 		time_t timestamp;
 		log::debug("RESUMED AT: {}", fmt::to_string(time(&timestamp)));
-
-		data::resumeLevel(Mod::get()->getSavedValue<int>("current-level-id"));
+		log::debug("PauseLayer onResume() CALLED!!!!");
+		data::resumeLevel(m_fields->m_levelID);
 
 
 		PauseLayer::onResume(sender);
 	}
 	void onPtButton(CCObject * sender) {
 
-		auto btn = static_cast<CCMenuItemSpriteExtra*>(sender);
+		// auto btn = static_cast<CCMenuItemSpriteExtra*>(sender);
 
-		btn->setScale(0.7f);
 
-		FLAlertLayer::create(
-			"Playtime Tracker",
-			"test text",
-			"close")->show();
+		auto playtime = data::getSessionPlaytimeRaw(m_fields->m_levelID);
+			FLAlertLayer::create(
+				"Playtime Tracker",
+				CCString::createWithFormat("Current Session: %s", data::formattedPlaytime(playtime, false))->getCString(),
+				"close")->show();
 	}
 };

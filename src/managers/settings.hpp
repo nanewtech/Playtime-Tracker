@@ -4,5 +4,11 @@
 class settings {
 public:
 	static bool getRemovePauses();
+
+	static bool getShortText();
+
+	static std::string getHighestConvert();
+
+	static std::string getInfoLayerPosition();
 };
-#endif // !data_h
+#endif // !settings_h
