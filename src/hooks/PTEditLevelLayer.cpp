@@ -10,7 +10,7 @@
 using namespace geode::prelude;
 
 class $modify(PTEditLevelLayer, EditLevelLayer) {
-	bool init(GJGameLevel * level) {
+	bool init(GJGameLevel* level) {
 		if (!(EditLevelLayer::init(level))) {
 			return false;
 		}
@@ -51,13 +51,14 @@ class $modify(PTEditLevelLayer, EditLevelLayer) {
 		auto obj = static_cast<CCNode*>(sender)->getUserObject();
 
 		std::string str = static_cast<CCString*>(obj)->getCString();
-		auto playtime = data::getPlaytimeRaw(str);
+		auto totalPlaytime = data::getPlaytimeRaw(str);
+		auto lastPlaytime = data::getLatestSession(str);
 
+		// call menupopup here as well
 
 		FLAlertLayer::create(
 			"Playtime Tracker",
-			CCString::create(data::formattedPlaytime(playtime))->getCString(),
-			"close"
-		)->show();
+			CCString::create("Total Playtime: " + data::formattedPlaytime(totalPlaytime) + " Last Session: " + data::formattedPlaytime(lastPlaytime))->getCString(),
+			"Close")->show();
 	}
 };

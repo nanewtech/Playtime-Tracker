@@ -12,6 +12,8 @@ public :
 
 	static void exitLevel(std::string levelID);
 
+	static int getLatestSession(std::string levelID);
+
 	static int getSessionPlaytimeRaw(std::string levelID);
 
 	static int getPlaytimeRaw(std::string levelID);

@@ -106,6 +106,20 @@ void data::exitLevel(std::string levelID) {
     }
 }
 
+int data::getLatestSession(std::string levelID) {
+    auto data = getFile();
+
+    int playtime = 0;
+
+    time_t timestamp;
+
+    for (auto& currPair : data[levelID]["sessions"][data[levelID]["sessions"].size() - 1]) {
+
+        playtime += currPair[1].asInt().unwrap() - currPair[0].asInt().unwrap();
+    }
+    return playtime;
+}
+
 int data::getSessionPlaytimeRaw(std::string levelID) {
     auto data = getFile();
 
@@ -113,17 +127,12 @@ int data::getSessionPlaytimeRaw(std::string levelID) {
 
     time_t timestamp;
 
-    if (settings::getRemovePauses()) {
-        for (auto& currPair : data[levelID]["sessions"][data[levelID]["sessions"].size() - 1]) {
-
-            playtime += currPair[1].asInt().unwrap() - currPair[0].asInt().unwrap();
-        }
-        return playtime;
-    }
+    if (settings::getRemovePauses()) return getLatestSession(levelID);
 
     return time(&timestamp) - data[levelID]["sessions"][data[levelID]["sessions"].size() - 1][data[levelID]["sessions"][data[levelID]["sessions"].size() - 1].size() - 1][0].asInt().unwrap();
 }
 
+// do this inside level
 int data::getPlaytimeRaw(std::string levelID) {
     auto data = getFile();
 
@@ -141,7 +150,7 @@ int data::getPlaytimeRaw(std::string levelID) {
         return playtime;
     }
     time_t timestamp;
-    if (data[levelID]["sessions"][data[levelID]["sessions"].size() - 1][data[levelID]["sessions"][data[levelID]["sessions"].size() - 1].size() - 1][0].isExactlyUInt()) {
+    if (data[levelID]["sessions"][data[levelID]["sessions"].size() - 1][data[levelID]["sessions"][data[levelID]["sessions"].size() - 1].size() - 1][0].isExactlyUInt() && data[levelID]["sessions"][data[levelID]["sessions"].size() - 1][data[levelID]["sessions"][data[levelID]["sessions"].size() - 1].size() - 1].size() == 1) {
         log::debug("SESSION PT VAL: {}", data[levelID]["sessions"][data[levelID]["sessions"].size() - 1][data[levelID]["sessions"][data[levelID]["sessions"].size() - 1].size() - 1][0].asInt().unwrap());
         return time(&timestamp) - data[levelID]["sessions"][data[levelID]["sessions"].size() - 1][data[levelID]["sessions"][data[levelID]["sessions"].size() - 1].size() - 1][0].asInt().unwrap();
     }

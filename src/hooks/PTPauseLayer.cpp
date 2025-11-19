@@ -47,7 +47,7 @@ class $modify(PTPauseLayer, PauseLayer) {
 		PauseLayer::onQuit(sender);
 	}
 	*/
-	void onResume(CCObject * sender) {
+	void onResume(CCObject* sender) {
 		time_t timestamp;
 		log::debug("RESUMED AT: {}", fmt::to_string(time(&timestamp)));
 		log::debug("PauseLayer onResume() CALLED!!!!");
@@ -56,10 +56,11 @@ class $modify(PTPauseLayer, PauseLayer) {
 
 		PauseLayer::onResume(sender);
 	}
-	void onPtButton(CCObject * sender) {
+	void onPtButton(CCObject* sender) {
 
 		// auto btn = static_cast<CCMenuItemSpriteExtra*>(sender);
 
+		// TODO: Make popup for pause menu, call it here
 
 		auto playtime = data::getSessionPlaytimeRaw(m_fields->m_levelID);
 			FLAlertLayer::create(

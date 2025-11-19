@@ -14,7 +14,7 @@ class $modify(PTPlayLayer, PlayLayer) {
 	struct Fields {
 	std::string m_levelID;
 	};
-	bool init(GJGameLevel * level, bool useReplay, bool dontCreateObjects) {
+	bool init(GJGameLevel* level, bool useReplay, bool dontCreateObjects) {
 		if (!PlayLayer::init(level, useReplay, dontCreateObjects)) {
 			return false;
 		}

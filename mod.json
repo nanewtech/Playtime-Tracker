@@ -36,7 +36,7 @@
 			"name": "Convert playtime up to",
 			"description": "Whenever you check your playtime, the mod will convert it up to the selected unit, e.g. if you select \"Hours\", you will see your playtime converted to hours, minutes and seconds whereas if you select \"Days\", you get your playtime converted to days, hours, minutes and seconds.",
 			"one-of": ["Days", "Hours", "Minutes", "Seconds"],
-			"default": "Days"
+			"default": "Hours"
 		},
 		"infoLayer-position":{
 			"type": "string",
@@ -49,6 +49,9 @@
 	"links": {
 		"source": "https://github.com/nanewtech/Playtime-Tracker"
 	},
+	"issues": {
+		"url": "https://github.com/nanewtech/Playtime-Tracker/issues",
+		"info": "Please report any bugs/crashes etc. on the repository with an issue! Additionally, you can send me a dm on discord: @nanewtech"},
 	"tags": ["offline", "utility"],
 	"resources": {
 		"sprites": ["resources/playtimeButton.png"]

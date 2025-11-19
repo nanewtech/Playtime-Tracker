@@ -2,21 +2,29 @@
 #include <Geode/Geode.hpp>
 #include <Geode/modify/LevelInfoLayer.hpp>
 
+#include <cvolton.level-id-api/include/EditorIDs.hpp>
+
 #include "../managers/data.hpp"
 #include "../managers/settings.hpp"
+#include "../layers/menuPopup.hpp"
 
 using namespace geode::prelude;
 
 
 class $modify(PTLevelInfoLayer, LevelInfoLayer) {
-
+	struct Fields {
+		GJGameLevel* m_level;
+	};
 	
 
-	bool init(GJGameLevel * level, bool challenge) {
+	bool init(GJGameLevel* level, bool challenge) {
+		
+		
 		if (!LevelInfoLayer::init(level, challenge)) {
 			return false;
 		}
 
+		m_fields->m_level = level;
 
 		auto sprite = CCSprite::create("playtimeButton.png"_spr);
 		if(settings::getInfoLayerPosition() == "Bottom") sprite->setScale(0.8f);
@@ -32,7 +40,7 @@ class $modify(PTLevelInfoLayer, LevelInfoLayer) {
 
 		playtimeButton->setID("playtime-tracker-button");
 		// playtimeButton->setTag(level->m_levelID.value());
-		playtimeButton->setUserObject(CCString::create(std::to_string(level->m_levelID.value())));
+		playtimeButton->setUserObject(CCString::create(std::to_string(EditorIDs::getID(level))));
 		playtimeButton->setZOrder(1);
 
 
@@ -72,21 +80,28 @@ class $modify(PTLevelInfoLayer, LevelInfoLayer) {
 		return true;
 	}
 
-	void onPlaytimeButton(CCObject * sender) {
+	void onPlaytimeButton(CCObject* sender) {
 
 		auto obj = static_cast<CCNode*>(sender)->getUserObject();
 
-		auto playtime = data::getPlaytimeRaw(static_cast<CCString*>(obj)->getCString());
+		auto totalPlaytime = data::getPlaytimeRaw(static_cast<CCString*>(obj)->getCString());
+		auto lastPlaytime = data::getLatestSession(static_cast<CCString*>(obj)->getCString());
+		
 		// log::debug("Playtime Raw: {}", fmt::to_string(playtime));
 		// log::debug("Playtime Formatted: {}", fmt::to_string(data::formattedPlaytime(playtime, false)));
 
 		// auto btn = static_cast<CCMenuItemSpriteExtra*>(sender);
 
 		// btn->setScale(0.8f);
+		
 
-		FLAlertLayer::create(
-			"Playtime Tracker",
-			CCString::create(data::formattedPlaytime(playtime))->getCString(),
-			"Close")->show();
+		MenuPopup::create(m_fields->m_level)->show();
+
+		/*
+			FLAlertLayer::create(
+				"Playtime Tracker",
+				CCString::create("Total Playtime: " + data::formattedPlaytime(totalPlaytime) + " Last Session: " + data::formattedPlaytime(lastPlaytime))->getCString(),
+				"Close")->show();
+		*/
 	}
 };
