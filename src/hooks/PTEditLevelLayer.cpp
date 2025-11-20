@@ -6,16 +6,21 @@
 
 #include "../managers/data.hpp"
 #include "../managers/settings.hpp"
+#include "../layers/menuPopup.hpp"
 
 using namespace geode::prelude;
 
 class $modify(PTEditLevelLayer, EditLevelLayer) {
+	struct Fields {
+		GJGameLevel* m_level;
+	};
+	
 	bool init(GJGameLevel* level) {
 		if (!(EditLevelLayer::init(level))) {
 			return false;
 		}
 
-
+		m_fields->m_level = level;
 
 		auto sprite = CCSprite::create("playtimeButton.png"_spr);
 		auto playtimeButton = CCMenuItemSpriteExtra::create(
@@ -56,9 +61,12 @@ class $modify(PTEditLevelLayer, EditLevelLayer) {
 
 		// call menupopup here as well
 
-		FLAlertLayer::create(
-			"Playtime Tracker",
-			CCString::create("Total Playtime: " + data::formattedPlaytime(totalPlaytime) + " Last Session: " + data::formattedPlaytime(lastPlaytime))->getCString(),
-			"Close")->show();
+		MenuPopup::create(m_fields->m_level)->show();
+		/*
+			FLAlertLayer::create(
+				"Playtime Tracker",
+				CCString::create("Total Playtime: " + data::formattedPlaytime(totalPlaytime) + " Last Session: " + data::formattedPlaytime(lastPlaytime))->getCString(),
+				"Close")->show();
+		*/
 	}
 };
