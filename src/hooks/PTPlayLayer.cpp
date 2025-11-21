@@ -25,7 +25,7 @@ class $modify(PTPlayLayer, PlayLayer) {
 
 		m_fields->m_levelID = std::to_string(EditorIDs::getID(level));
 		
-		if (level->m_levelType == GJLevelType::Local || level->m_levelType == GJLevelType::Editor) m_fields->m_levelID = "Editor-" + std::to_string(EditorIDs::getID(level));
+		if (level->m_levelType == GJLevelType::Editor) m_fields->m_levelID = "Editor-" + std::to_string(EditorIDs::getID(level));
 		log::debug("EDITOR ID: {}", EditorIDs::getID(level));
 		log::debug("LEVEL ID FIELD: {}", m_fields->m_levelID);
 

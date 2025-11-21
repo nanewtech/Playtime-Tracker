@@ -65,7 +65,7 @@ class $modify(PTPauseLayer, PauseLayer) {
 		auto playtime = data::getSessionPlaytimeRaw(m_fields->m_levelID);
 			FLAlertLayer::create(
 				"Playtime Tracker",
-				CCString::create("Current Session: %s" + data::formattedPlaytime(playtime))->getCString(),
+				CCString::create("Current Session: " + data::formattedPlaytime(playtime))->getCString(),
 				"close")->show();
 	}
 };

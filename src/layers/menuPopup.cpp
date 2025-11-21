@@ -120,7 +120,7 @@ bool MenuPopup::setup(GJGameLevel* const& level) {
 
     
     
-    content->setContentSize({ 265.f, 250.f + 25.f * data::getSessionCount(levelID) });
+    content->setContentSize({ 265.f, 180.f + 30.f * (data::getSessionCount(levelID)) });
 
     content->updateLayout();
 

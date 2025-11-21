@@ -8,7 +8,7 @@
 	},
 	"id": "nanew.playtime-tracker",
 	"name": "Playtime Tracker",
-	"version": "v0.8.0",
+	"version": "v0.8.1",
 	"developer": "nanew",
 	"description": "Track your playtime on levels!",
 	"dependencies": {
@@ -40,7 +40,7 @@
 			"type": "bool",
 			"name": "Use short playtime text",
 			"description": "If enabled, uses a short version of the playtime, e.g. Xd Xh Xm Xs. When disabled, writes out the formats, e.g. X Days, X Hours, X Minutes, X Seconds.",
-			"default":false
+			"default":true
 		},
 		"highest-convert":{
 			"type": "string",

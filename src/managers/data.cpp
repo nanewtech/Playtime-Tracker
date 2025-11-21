@@ -9,7 +9,7 @@
 using namespace geode::prelude;
 
 auto dataDir = Mod::get()->getSaveDir().string() + "/leveldata.json";
-std::filesystem::path dataDirPath = std::filesystem::u8path(dataDir); // check if necessary, deprecated but saw online its something with windows path that could break?!?!
+std::filesystem::path dataDirPath = std::filesystem::u8path(dataDir); 
 
 
 bool fileExists() {
@@ -20,7 +20,7 @@ bool fileExists() {
 }
 
 void writeFile(matjson::Value data) {
-    std::string output = data.dump(); //REMEMBER TO READD NO INDENT lowkey just no indentation cause it makes editing the file harder = less cheating @mizuki :eyes: :eyes:
+    std::string output = data.dump(matjson::NO_INDENTATION); //REMEMBER TO READD NO INDENT lowkey just no indentation cause it makes editing the file harder = less cheating @mizuki :eyes: :eyes:
     std::ofstream o(dataDirPath);
     o << output;
     o.close();
@@ -240,11 +240,9 @@ tm* data::getLastPlayedRaw(std::string levelID) {
 tm* data::getPlayedRawAtIndex(std::string levelID, int index) {
     auto data = getFile();
     time_t timestamp = time(0);
-    if (data[levelID]["sessions"][index][0].isExactlyUInt()) {
-        int sessionStart = data[levelID][index][0].asInt().unwrap();
+        int sessionStart = data[levelID]["sessions"][index][0][0].asInt().unwrap();
         timestamp = static_cast<time_t>(sessionStart);
 
-    }
     return localtime(&timestamp);
 }
 
@@ -268,7 +266,7 @@ std::string data::getPlayedFormatted(tm* localTimestamp) {
         if (settings::getTimeFormat() == "EU") timeformat = "%d.%m.%Y %T";
     }
         
-    char formatted[sizeof(timeformat)*3];
+    char formatted[sizeof(timeformat)*10];
 
     strftime(formatted, sizeof(formatted), timeformat, localTimestamp);
     return formatted;
