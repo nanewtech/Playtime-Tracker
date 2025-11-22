@@ -78,4 +78,10 @@ class $modify(PTPauseLayer, PauseLayer) {
 		Mod::get()->setSavedValue<bool>("is-paused", false);
 		PauseLayer::onPracticeMode(sender);
 	}
+
+	void onEdit(CCObject* sender) {
+		Mod::get()->setSavedValue<bool>("is-paused", false);
+		data::exitLevel(m_fields->m_levelID);
+		PauseLAyer::onEdit(sender);
+	}
 };
