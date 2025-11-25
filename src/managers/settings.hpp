@@ -1,5 +1,4 @@
 #pragma once
-#ifndef settings_h
 #define settings_h
 
 class settings {
@@ -20,4 +19,3 @@ public:
 
 	static std::string getCustomTimeFormat();
 };
-#endif // !settings_h

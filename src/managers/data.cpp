@@ -287,6 +287,20 @@ void data::deleteLevelData(std::string levelID) {
 
 void data::deleteSessionAtIndex(std::string levelID, int index) {
     auto data = getFile();
-    data[levelID]["sessions"][index] = matjson::Value::array();
-    writeFile(data);
+
+    if (data[levelID]["sessions"].size() == 1) {
+        deleteLevelData(levelID);
+    } else {
+        data[levelID]["sessions"][index] = NULL;
+
+        auto sessions = matjson::Value::array();
+
+        for (auto& currItem : data[levelID]["sessions"]) {
+            if (!currItem[0].isNull()) sessions.push(currItem);
+        }
+
+        data[levelID]["sessions"] = sessions;
+
+        writeFile(data);
+    }
 }

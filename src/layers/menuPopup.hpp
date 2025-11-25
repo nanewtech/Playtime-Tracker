@@ -1,5 +1,4 @@
 #pragma once
-#ifndef menuPopup_h
 #define menuPopup_h
 
 #include <Geode/Geode.hpp>
@@ -14,5 +13,3 @@ public:
 	static MenuPopup* create(GJGameLevel* const& level);
 	static CCMenu* SessionMenuElement(std::string levelID, int index);
 };
-
-#endif // !menuPopup_h

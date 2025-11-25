@@ -22,22 +22,29 @@ public:
 class DeleteButton : public CCLayer {
 public:
     void onDeleteAllButton(CCObject* sender) {
+
+        auto obj = static_cast<CCNode*>(sender)->getUserObject();
+        std::string levelID = static_cast<CCString*>(obj)->getCString();
+
         geode::createQuickPopup(
             "Delete level data",
             "Are you SURE you want to <cr>delete ALL data</c> on this level? (<cr>ALL your sessions will be deleted!</c>)",
             "Don't delete", "Delete everything",
-            [](auto, bool btn2) {
+            [levelID](auto, bool btn2) {
                 if (btn2) {
-                    actuallyDeleteData();
-                    
+                    data::deleteLevelData(levelID);                
                 }
             }
         );
     }
-    static void actuallyDeleteData() {
-        std::string levelID = Mod::get()->getSavedValue<std::string>("current-level-id");
-        log::debug("DELETING LEVEL DATA FOR: {}", levelID);
-        data::deleteLevelData(levelID);
+
+    void onDeleteSessionButton(CCObject* sender) {
+        int index = static_cast<CCNode*>(sender)->getTag();
+
+        auto obj = static_cast<CCNode*>(sender)->getUserObject();
+        std::string levelID = static_cast<CCString*>(obj)->getCString();
+
+        data::deleteSessionAtIndex(levelID, index);
     }
 };
 
@@ -164,14 +171,12 @@ bool MenuPopup::setup(GJGameLevel* const& level) {
     auto deleteSpr = CCSprite::createWithSpriteFrameName("GJ_trashBtn_001.png");
     deleteSpr->setScale(0.75f);
 
-    Mod::get()->setSavedValue<std::string>("current-level-id", levelID);
-
     auto deleteButton = CCMenuItemSpriteExtra::create(
         deleteSpr,
         this,
         menu_selector(DeleteButton::onDeleteAllButton)
     );
-
+    deleteButton->setUserObject(CCString::create(levelID));
     deleteButton->setPosition({300.f, 0.f});
 
     extrabuttons->addChild(deleteButton);
@@ -217,6 +222,16 @@ CCMenu* MenuPopup::SessionMenuElement(std::string levelID, int index) {
     auto sessionTitle = CCLabelBMFont::create(CCString::create("Session " + std::to_string(index + 1) + " - " + data::getPlayedFormatted(data::getPlayedRawAtIndex(levelID, index)))->getCString(), "bigFont.fnt");
     auto sessionPlaytime = CCLabelBMFont::create(CCString::create(data::formattedPlaytime(data::getSessionPlaytimeRawAtIndex(levelID, index)))->getCString(), "bigFont.fnt");
 
+    auto deleteSessionButton = CCMenuItemSpriteExtra::create(
+        CCSprite::createWithSpriteFrameName("GJ_trashBtn_001.png"),
+        menu,
+        menu_selector(DeleteButton::onDeleteSessionButton)
+    );
+
+    deleteSessionButton->setTag(index);
+    deleteSessionButton->setUserObject(CCString::create(levelID));
+    deleteSessionButton->setPosition({ 225.f, 12.5f });
+
     sessionTitle->setPosition({ 0.f,25.f });
     sessionTitle->setScale(0.35f);
     sessionTitle->setAnchorPoint({ 0.f,1.f });
@@ -225,7 +240,7 @@ CCMenu* MenuPopup::SessionMenuElement(std::string levelID, int index) {
     sessionPlaytime->setAnchorPoint({ 0.f,0.f });
 
     // TODO: add delete button for single session
-
+    menu->addChild(deleteSessionButton);
     menu->addChild(sessionTitle);
     menu->addChild(sessionPlaytime);
 

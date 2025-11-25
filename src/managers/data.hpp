@@ -1,5 +1,4 @@
 #pragma once
-#ifndef data_h
 #define data_h
 
 class data {
@@ -35,4 +34,3 @@ public :
 
 	static void deleteSessionAtIndex(std::string levelID, int index);
 };
-#endif // !data_h
