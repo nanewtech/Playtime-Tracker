@@ -1,6 +1,6 @@
 #include "./data.hpp"
 #include "./settings.hpp"
-#include "backup.hpp"
+#include "./backup.hpp"
 
 #include <fstream>
 #include <ctime>
@@ -9,8 +9,8 @@
 
 using namespace geode::prelude;
 
-auto dataDir = Mod::get()->getSaveDir().string() + "/leveldata.json";
-std::filesystem::path dataDirPath = std::filesystem::path(dataDir); 
+std::string dataDir = Mod::get()->getSaveDir().string() + "/leveldata.json";
+std::filesystem::path dataDirPath = std::filesystem::path(dataDir);
 
 
 bool Data::fileExists() {
@@ -31,16 +31,20 @@ static void initializeFile() {
     matjson::Value data;
 
     writeFile(data);
-
-    log::debug("Created data file at: {}", fmt::to_string(dataDirPath));
 }
 
 matjson::Value Data::getFile() {
     if (Data::fileExists()) {
-        std::ifstream i(dataDir);
-        auto data = matjson::parse(i).unwrap();
-        i.close();
-        return data;
+        try {
+            std::ifstream i(dataDir);
+            auto data = matjson::parse(i).unwrap();
+            i.close();
+            return data;
+        }
+        catch (geode::UnwrapException) {
+            log::debug("LEVELDATA BROKEN, LOADING BACKUP");
+            Backup::loadBackup();
+        }
     }
     else if (Backup::fileExists()) {
         log::debug("FILE DOESNT EXIST, LOADING BACKUP");
@@ -72,7 +76,7 @@ void Data::startLevel(std::string levelID) {
 
     // I'm so sorry about what youre about to read..... :3
     // I'm too stupid to make it simpler.,,..,. forgive me for i have sinned..... 
-    if (!(settings::getStopOnCompletion() && Mod::get()->getSavedValue<int>("current-level-best") == 100)) { 
+    if (!(Settings::getStopOnCompletion() && Mod::get()->getSavedValue<int>("current-level-best") == 100)) { 
         data[levelID]["sessions"].push(matjson::Value::array());
 
         data[levelID]["sessions"][data[levelID]["sessions"].size() - 1].push(matjson::Value::array());
@@ -87,8 +91,8 @@ void Data::startLevel(std::string levelID) {
 
 void Data::pauseLevel(std::string levelID) {
     
-    if (!(settings::getStopOnCompletion() && Mod::get()->getSavedValue<int>("current-level-best") == 100)) {
-        if (settings::getRemovePauses()) {
+    if (!(Settings::getStopOnCompletion() && Mod::get()->getSavedValue<int>("current-level-best") == 100)) {
+        if (Settings::getRemovePauses()) {
 
             auto data = getFile();
             time_t timestamp;
@@ -101,8 +105,8 @@ void Data::pauseLevel(std::string levelID) {
 }
 
 void Data::resumeLevel(std::string levelID) {
-    if (!(settings::getStopOnCompletion() && Mod::get()->getSavedValue<int>("current-level-best") == 100)) {
-        if (settings::getRemovePauses()) {
+    if (!(Settings::getStopOnCompletion() && Mod::get()->getSavedValue<int>("current-level-best") == 100)) {
+        if (Settings::getRemovePauses()) {
             auto data = getFile();
             time_t timestamp;
 
@@ -117,16 +121,16 @@ void Data::resumeLevel(std::string levelID) {
 
 void Data::exitLevel(std::string levelID) {
     log::debug("EXIT LEVEL CALLED!");
-    if (!(settings::getStopOnCompletion() && Mod::get()->getSavedValue<int>("current-level-best") == 100)) {
+    if (!(Settings::getStopOnCompletion() && Mod::get()->getSavedValue<int>("current-level-best") == 100)) {
         log::debug("GETS PAST COMPLETION CHECK");
-        if (!(settings::getRemovePauses()) || (Mod::get()->getSavedValue<bool>("is-paused") && !(settings::getRemovePauses())) || (!(Mod::get()->getSavedValue<bool>("is-paused")) && settings::getRemovePauses())) {
+        if (!(Settings::getRemovePauses()) || (Mod::get()->getSavedValue<bool>("is-paused") && !(Settings::getRemovePauses())) || (!(Mod::get()->getSavedValue<bool>("is-paused")) && Settings::getRemovePauses())) {
             auto data = getFile();
             time_t timestamp;
 
             data[levelID]["sessions"][data[levelID]["sessions"].size() - 1][data[levelID]["sessions"][data[levelID]["sessions"].size() - 1].size() - 1].push(time(&timestamp));
 
             writeFile(data);
-            Backup::createBackup();
+            Backup::createBackup(Data::getFile());
         }
     }
 }
@@ -157,7 +161,7 @@ int Data::getSessionPlaytimeRaw(std::string levelID) {
 
     time_t timestamp;
 
-    if (settings::getRemovePauses()) return getLatestSession(levelID);
+    if (Settings::getRemovePauses()) return getLatestSession(levelID);
 
     return time(&timestamp) - data[levelID]["sessions"][data[levelID]["sessions"].size() - 1][data[levelID]["sessions"][data[levelID]["sessions"].size() - 1].size() - 1][0].asInt().unwrap();
 }
@@ -170,7 +174,7 @@ int Data::getPlaytimeRaw(std::string levelID) {
     
     if (!(sessionsInitialized(levelID))) return playtime;
 
-    if (settings::getRemovePauses()) {
+    if (Settings::getRemovePauses()) {
         for (auto& value : data[levelID]["sessions"]) {
             // value is matjson::Value
             for (auto& currPair : value) {
@@ -204,36 +208,36 @@ std::string Data::formattedPlaytime(int playtime) {
     std::string formatted = "";
     std::list<std::string> suffix = { "d ", "h ", "m ", "s" };
 
-    if (!settings::getShortText())  suffix = { " Days, ", " Hours, ", " Minutes, ", " Seconds" };
+    if (!Settings::getShortText())  suffix = { " Days, ", " Hours, ", " Minutes, ", " Seconds" };
 
     // @nanew optimize plssss :3
     // there HAS to be a better way to do this 
-    if (settings::getHighestConvert() == "Days") {
+    if (Settings::getHighestConvert() == "Days") {
         days = playtime / 86400;
         if (days > 0) {
             playtime -= days * 86400;
-            if (days == 1 && !settings::getShortText()) formatted += std::to_string(minutes) + "Day, ";
-            if (days > 1 || settings::getShortText()) formatted += std::to_string(days) + *suffix.begin();
+            if (days == 1 && !Settings::getShortText()) formatted += std::to_string(minutes) + "Day, ";
+            if (days > 1 || Settings::getShortText()) formatted += std::to_string(days) + *suffix.begin();
         }
     }
-    if (settings::getHighestConvert() == "Days" || settings::getHighestConvert() == "Hours") {
+    if (Settings::getHighestConvert() == "Days" || Settings::getHighestConvert() == "Hours") {
         hours = playtime / 3600;
         if (hours > 0) {
             playtime -= hours * 3600;
-            if (hours == 1 && !settings::getShortText()) formatted += std::to_string(minutes) + "Hour, ";
-            if (hours > 1 || settings::getShortText()) formatted += std::to_string(hours) + *next(suffix.begin(), 1);
+            if (hours == 1 && !Settings::getShortText()) formatted += std::to_string(minutes) + "Hour, ";
+            if (hours > 1 || Settings::getShortText()) formatted += std::to_string(hours) + *next(suffix.begin(), 1);
         }
     }
-    if (!(settings::getHighestConvert() == "Seconds")) {
+    if (!(Settings::getHighestConvert() == "Seconds")) {
         minutes = playtime / 60;
         if (minutes > 0) {
             playtime -= minutes * 60;
-            if (minutes == 1 && !settings::getShortText()) formatted += std::to_string(minutes) + "Minute, "; // grammar......
-            if (minutes > 1 || settings::getShortText()) formatted += std::to_string(minutes) + *next(suffix.begin(), 2);
+            if (minutes == 1 && !Settings::getShortText()) formatted += std::to_string(minutes) + "Minute, "; // grammar......
+            if (minutes > 1 || Settings::getShortText()) formatted += std::to_string(minutes) + *next(suffix.begin(), 2);
         }
     }
     // grammar........ :hugefrownyface:
-    if (playtime == 1 && !settings::getShortText()) { 
+    if (playtime == 1 && !Settings::getShortText()) { 
         formatted += "1 Second";
         return formatted;
     }
@@ -256,8 +260,9 @@ tm* Data::getLastPlayedRaw(std::string levelID) {
 tm* Data::getPlayedRawAtIndex(std::string levelID, int index) {
     auto data = getFile();
     time_t timestamp = time(0);
-        int sessionStart = data[levelID]["sessions"][index][0][0].asInt().unwrap();
-        timestamp = static_cast<time_t>(sessionStart);
+        
+    int sessionStart = data[levelID]["sessions"][index][0][0].asInt().unwrap();
+    timestamp = static_cast<time_t>(sessionStart);
 
     return localtime(&timestamp);
 }
@@ -265,21 +270,26 @@ tm* Data::getPlayedRawAtIndex(std::string levelID, int index) {
 int Data::getSessionPlaytimeRawAtIndex(std::string levelID, int index) {
     auto data = getFile();
     int playtime = 0;
+    try {
+        for (auto& currPair : data[levelID]["sessions"][index]) {
 
-    for (auto& currPair : data[levelID]["sessions"][index]) {
-
-        playtime += currPair[1].asInt().unwrap() - currPair[0].asInt().unwrap();
+            playtime += currPair[1].asInt().unwrap() - currPair[0].asInt().unwrap();
+        }
+        return playtime;
     }
-    return playtime;
+    catch (geode::UnwrapException) {
+        Backup::loadBackup();
+        return -1;
+    }
 }
 
 std::string Data::getPlayedFormatted(tm* localTimestamp) {
     
-    auto timeformat = CCString::create(settings::getCustomTimeFormat())->getCString();
-    if (!(settings::getUseCustomTimeFormat())) {
-        if (settings::getTimeFormat() == "ISO") timeformat = "%F %T";
-        if (settings::getTimeFormat() == "USA") timeformat = "%m/%d/%Y %r";
-        if (settings::getTimeFormat() == "EU") timeformat = "%d.%m.%Y %T";
+    auto timeformat = CCString::create(Settings::getCustomTimeFormat())->getCString();
+    if (!(Settings::getUseCustomTimeFormat())) {
+        if (Settings::getTimeFormat() == "ISO") timeformat = "%F %T";
+        if (Settings::getTimeFormat() == "USA") timeformat = "%m/%d/%Y %r";
+        if (Settings::getTimeFormat() == "EU") timeformat = "%d.%m.%Y %T";
     }
         
     char formatted[sizeof(timeformat)*10];

@@ -2,7 +2,7 @@
 #define data_h
 
 class Data {
-public : 
+public: 
 	static bool fileExists();
 
 	static matjson::Value getFile();

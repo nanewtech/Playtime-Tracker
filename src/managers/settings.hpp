@@ -1,7 +1,7 @@
 #pragma once
 #define settings_h
 
-class settings {
+class Settings {
 public:
 	static bool getRemovePauses();
 

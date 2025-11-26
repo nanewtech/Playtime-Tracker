@@ -26,12 +26,12 @@ public:
         std::string levelID = static_cast<CCString*>(obj)->getCString();
         geode::createQuickPopup(
             "Delete level data",
-            "Are you SURE you want to <cr>delete ALL data</c> on this level? (<cr>ALL your sessions will be deleted!</c>)",
+            "Are you SURE you want to <cr>delete ALL data</c> on this level? (<cr>ALL your sessions will be deleted! This action is IRREVERSIBLE</c>)",
             "Don't delete", "Delete everything",
             [levelID](auto, bool btn2) {
                 if (btn2) {
                     Data::deleteLevelData(levelID);
-                    FLAlertLayer::create(
+                    if (!Settings::getDisableDeletionPopup()) FLAlertLayer::create(
                         "Delete level Data",
                         "Deleted all data. Reopen the popup for changes to take effect. <cy>You can disable this popup in the settings.</c>",
                         "OK"
@@ -47,13 +47,21 @@ public:
 
         auto obj = static_cast<CCNode*>(sender)->getUserObject();
         std::string levelID = static_cast<CCString*>(obj)->getCString();
-
-        Data::deleteSessionAtIndex(levelID, index);
-        FLAlertLayer::create(
-            "Delete session Data",
-            CCString::createWithFormat("Deleted session %i. Reopen the popup for changes to take effect. <cy>You can disable this popup in the settings.</c>", index + 1)->getCString(),
-            "OK"
-        )->show();
+        geode::createQuickPopup(
+            "Delete session",
+            CCString::createWithFormat("Are you SURE you want to <cr>delete session %i</c> on this level? (<cr>This action is IRREVERSIBLE!</c>)", index + 1)->getCString(),
+            "Don't delete", "Delete session",
+            [levelID, index](auto, bool btn2) {
+                if (btn2) {
+                    Data::deleteSessionAtIndex(levelID, index);
+                    if (!Settings::getDisableDeletionPopup()) FLAlertLayer::create(
+                        "Delete session Data",
+                        CCString::createWithFormat("Deleted session %i. Reopen the popup for changes to take effect. <cy>You can disable this popup in the settings.</c>", index + 1)->getCString(),
+                        "OK"
+                    )->show();
+                }
+            }
+        );
     }
 };
 
@@ -229,7 +237,8 @@ CCMenu* MenuPopup::SessionMenuElement(std::string levelID, int index) {
     menu->setContentSize({ 265.f, 25.f });
     menu->setTag(index);
     auto sessionTitle = CCLabelBMFont::create(CCString::create("Session " + std::to_string(index + 1) + " - " + Data::getPlayedFormatted(Data::getPlayedRawAtIndex(levelID, index)))->getCString(), "bigFont.fnt");
-    auto sessionPlaytime = CCLabelBMFont::create(CCString::create(Data::formattedPlaytime(Data::getSessionPlaytimeRawAtIndex(levelID, index)))->getCString(), "bigFont.fnt");
+    auto sessionPlaytime = CCLabelBMFont::create("corrupted session, will disappear", "bigFont.fnt");
+    if (Data::getSessionPlaytimeRawAtIndex(levelID, index) != -1) sessionPlaytime = CCLabelBMFont::create(CCString::create(Data::formattedPlaytime(Data::getSessionPlaytimeRawAtIndex(levelID, index)))->getCString(), "bigFont.fnt");
 
     auto deleteSprite = CCSprite::createWithSpriteFrameName("GJ_trashBtn_001.png");
     deleteSprite->setScale(0.55f);

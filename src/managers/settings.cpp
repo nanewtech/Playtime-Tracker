@@ -3,38 +3,38 @@
 using namespace geode::prelude;
 
 
-bool settings::getRemovePauses() {
+bool Settings::getRemovePauses() {
 	return Mod::get()->getSettingValue<bool>("remove-pauses");
 }
 
-bool settings::getShortText() {
+bool Settings::getShortText() {
 	return Mod::get()->getSettingValue<bool>("short-text");
 }
 
-std::string settings::getHighestConvert() {
+std::string Settings::getHighestConvert() {
 	return Mod::get()->getSettingValue<std::string>("highest-convert");
 }
 
-std::string settings::getInfoLayerPosition() {
+std::string Settings::getInfoLayerPosition() {
 	return Mod::get()->getSettingValue<std::string>("infoLayer-position");
 }
 
-bool settings::getStopOnCompletion() {
+bool Settings::getStopOnCompletion() {
 	return Mod::get()->getSettingValue<bool>("stop-completion");
 }
 
-std::string settings::getTimeFormat() {
+std::string Settings::getTimeFormat() {
 	return Mod::get()->getSettingValue<std::string>("time-format");
 }
 
-bool settings::getUseCustomTimeFormat() {
+bool Settings::getUseCustomTimeFormat() {
 	return Mod::get()->getSettingValue<bool>("use-custom-time-format");
 }
 
-std::string settings::getCustomTimeFormat() {
+std::string Settings::getCustomTimeFormat() {
 	return Mod::get()->getSettingValue<std::string>("custom-time-format");
 }
 
-bool settings::getDisableDeletionPopup() {
+bool Settings::getDisableDeletionPopup() {
 	return Mod::get()->getSettingValue<bool>("disable-deletion-popup");
 }

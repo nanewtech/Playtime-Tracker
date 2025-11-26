@@ -28,7 +28,7 @@ class $modify(PTLevelInfoLayer, LevelInfoLayer) {
 		m_fields->m_level = level;
 
 		auto sprite = CCSprite::create("playtimeButton.png"_spr);
-		if(settings::getInfoLayerPosition() == "Bottom") sprite->setScale(0.8f);
+		if(Settings::getInfoLayerPosition() == "Bottom") sprite->setScale(0.8f);
 
 		auto playtimeButton = CCMenuItemSpriteExtra::create(
 			sprite,
@@ -45,7 +45,7 @@ class $modify(PTLevelInfoLayer, LevelInfoLayer) {
 		playtimeButton->setZOrder(1);
 
 
-		if (settings::getInfoLayerPosition() == "Bottom") {
+		if (Settings::getInfoLayerPosition() == "Bottom") {
 			float x = otherMenu->getChildByID("favorite-button")->getPositionX();
 			
 			float y = 76.5f; // fucking find a way to get rid of magic number.... :3

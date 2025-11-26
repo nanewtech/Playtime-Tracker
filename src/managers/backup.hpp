@@ -8,6 +8,6 @@ protected:
 
 public:
 	static bool fileExists();
-	static void createBackup();
+	static void createBackup(matjson::Value data);
 	static void loadBackup();
 };

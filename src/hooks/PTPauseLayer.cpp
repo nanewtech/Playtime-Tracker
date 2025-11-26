@@ -3,7 +3,6 @@
 #include <Geode/modify/PauseLayer.hpp>
 
 #include "../managers/data.hpp"
-#include "../managers/settings.hpp"
 
 using namespace geode::prelude;
 

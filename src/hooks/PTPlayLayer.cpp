@@ -5,7 +5,6 @@
 #include <cvolton.level-id-api/include/EditorIDs.hpp>
 
 #include "../managers/data.hpp"
-#include "../managers/settings.hpp"
 
 using namespace geode::prelude;
 
