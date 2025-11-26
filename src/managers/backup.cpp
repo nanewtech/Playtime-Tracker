@@ -1,4 +1,5 @@
 #include "./backup.hpp"
+#include <matjson.hpp>
 #include <fstream>
 
 using namespace geode::prelude;
@@ -18,6 +19,9 @@ matjson::Value Backup::getFile() {
 		i.close();
 		return data;
 	}
+	matjson::Value data;
+	Backup::createBackup(data);
+	return data;
 }
 
 void Backup::writeFile(matjson::Value data) {
