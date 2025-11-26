@@ -160,10 +160,13 @@ int Data::getSessionPlaytimeRaw(std::string levelID) {
     int playtime = 0;
 
     time_t timestamp;
+    try {
+        if (Settings::getRemovePauses()) return getLatestSession(levelID);
 
-    if (Settings::getRemovePauses()) return getLatestSession(levelID);
-
-    return time(&timestamp) - data[levelID]["sessions"][data[levelID]["sessions"].size() - 1][data[levelID]["sessions"][data[levelID]["sessions"].size() - 1].size() - 1][0].asInt().unwrap();
+        return time(&timestamp) - data[levelID]["sessions"][data[levelID]["sessions"].size() - 1][data[levelID]["sessions"][data[levelID]["sessions"].size() - 1].size() - 1][0].asInt().unwrap();
+    } catch (geode::UnwrapException) {
+        return playtime;
+    }
 }
 
 // do this inside level
@@ -173,32 +176,36 @@ int Data::getPlaytimeRaw(std::string levelID) {
     int playtime = 0;
     
     if (!(sessionsInitialized(levelID))) return playtime;
+    try {
+        if (Settings::getRemovePauses()) {
+            for (auto& value : data[levelID]["sessions"]) {
+                // value is matjson::Value
+                for (auto& currPair : value) {
 
-    if (Settings::getRemovePauses()) {
+                    playtime += currPair[1].asInt().unwrap() - currPair[0].asInt().unwrap();
+                }
+            }
+
+            return playtime;
+        }
+        time_t timestamp;
+        if (data[levelID]["sessions"][data[levelID]["sessions"].size() - 1][data[levelID]["sessions"][data[levelID]["sessions"].size() - 1].size() - 1][0].isExactlyUInt() && data[levelID]["sessions"][data[levelID]["sessions"].size() - 1][data[levelID]["sessions"][data[levelID]["sessions"].size() - 1].size() - 1].size() == 1) {
+            log::debug("SESSION PT VAL: {}", data[levelID]["sessions"][data[levelID]["sessions"].size() - 1][data[levelID]["sessions"][data[levelID]["sessions"].size() - 1].size() - 1][0].asInt().unwrap());
+            return time(&timestamp) - data[levelID]["sessions"][data[levelID]["sessions"].size() - 1][data[levelID]["sessions"][data[levelID]["sessions"].size() - 1].size() - 1][0].asInt().unwrap();
+        }
+
         for (auto& value : data[levelID]["sessions"]) {
             // value is matjson::Value
             for (auto& currPair : value) {
-                
                 playtime += currPair[1].asInt().unwrap() - currPair[0].asInt().unwrap();
             }
         }
 
         return playtime;
     }
-    time_t timestamp;
-    if (data[levelID]["sessions"][data[levelID]["sessions"].size() - 1][data[levelID]["sessions"][data[levelID]["sessions"].size() - 1].size() - 1][0].isExactlyUInt() && data[levelID]["sessions"][data[levelID]["sessions"].size() - 1][data[levelID]["sessions"][data[levelID]["sessions"].size() - 1].size() - 1].size() == 1) {
-        log::debug("SESSION PT VAL: {}", data[levelID]["sessions"][data[levelID]["sessions"].size() - 1][data[levelID]["sessions"][data[levelID]["sessions"].size() - 1].size() - 1][0].asInt().unwrap());
-        return time(&timestamp) - data[levelID]["sessions"][data[levelID]["sessions"].size() - 1][data[levelID]["sessions"][data[levelID]["sessions"].size() - 1].size() - 1][0].asInt().unwrap();
+    catch (geode::UnwrapException) {
+        return playtime;
     }
-
-    for (auto& value : data[levelID]["sessions"]) {
-        // value is matjson::Value
-        for (auto& currPair : value) {
-            playtime += currPair[1].asInt().unwrap() - currPair[0].asInt().unwrap();
-        }
-    }
-
-    return playtime;
 }
 
 std::string Data::formattedPlaytime(int playtime) {

@@ -11,8 +11,8 @@ Playtime Tracker is a simple mod that tracks your playtime while you're trying t
 If you happen to discover a bug, feel free to [open an issue on github](https://github.com/nanewtech/Playtime-Tracker/issues) or get support [on the discord server](https://discord.gg/DxYp6pma3D)
 
 ## Credits / Special Thanks
-**MostDefinitelyAlbert** - For the initial idea behind the mod + testing
+[**MostDefinitelyAlbert**](https://www.youtube.com/@MostDefinitelyAlbert) - For the initial idea behind the mod + testing
 
-**Jimaras17** - For the button / logo art + testing
+[**Jimaras17**](https://x.com/jimaras17_) - For the button / logo art + testing
 
 **st** - For helping me playtest the mod and being awesome in general

@@ -8,7 +8,7 @@
 	},
 	"id": "nanew.playtime-tracker",
 	"name": "Playtime Tracker",
-	"version": "v0.9.1",
+	"version": "v0.9.2",
 	"developer": "nanew",
 	"description": "Track your playtime on levels!",
 	"dependencies": {
@@ -52,9 +52,9 @@
 		"infoLayer-position":{
 			"type": "string",
 			"name": "Menu button position",
-			"description": "Decide if the button on the level info page should appear above the favorites or on the left side of the screen.",
+			"description": "Decide if the button on the level info page should appear above the favorites or on the left side of the screen. BOTTOM CAN LEAD TO ISSUES!",
 			"one-of": ["Bottom", "Left"],
-			"default": "Bottom"
+			"default": "Left"
 		},
 		"disable-deletion-popup":{
 			"type": "bool",
@@ -101,8 +101,7 @@
 	"tags": ["offline", "utility"],
 	"resources": {
 		"sprites": [
-			"resources/playtimeButton.png",
-			"resources/stopwatch.png"
+			"resources/playtimeButton.png"
 		]
 	}
 }
