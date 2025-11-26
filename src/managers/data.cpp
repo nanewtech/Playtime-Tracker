@@ -270,10 +270,14 @@ tm* Data::getPlayedRawAtIndex(std::string levelID, int index) {
 int Data::getSessionPlaytimeRawAtIndex(std::string levelID, int index) {
     auto data = getFile();
     int playtime = 0;
-    try {
+   try {
         for (auto& currPair : data[levelID]["sessions"][index]) {
-
-            playtime += currPair[1].asInt().unwrap() - currPair[0].asInt().unwrap();
+            if (currPair.size() == 2) {
+                playtime += currPair[1].asInt().unwrap() - currPair[0].asInt().unwrap();
+            }
+            else {
+                Data::deleteSessionAtIndex(levelID, index);
+            }
         }
         return playtime;
     }
