@@ -1,5 +1,6 @@
 #pragma once
-#define settings_h
+
+#include <string>
 
 class Settings {
 public:

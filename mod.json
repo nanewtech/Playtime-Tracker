@@ -8,7 +8,7 @@
 	},
 	"id": "nanew.playtime-tracker",
 	"name": "Playtime Tracker",
-	"version": "v0.9.2",
+	"version": "v0.9.3",
 	"developer": "nanew",
 	"description": "Track your playtime on levels!",
 	"dependencies": {
@@ -28,7 +28,7 @@
 			"type": "bool",
 			"name": "Remove pauses from Playtime",
 			"description": "If enabled, removes the time you spend in the pause menu from your playtime. This also removes the time you spend at the 'Level Complete' screen",
-			"default":true
+			"default":false
 		},
 		"stop-completion":{
 			"type": "bool",

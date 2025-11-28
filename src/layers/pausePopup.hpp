@@ -1,13 +1,11 @@
 #pragma once
-#define pausePopup_h
 
 #include <Geode/Geode.hpp>
+#include <string>
 
-using namespace geode::prelude;
-
-class PausePopup : public geode::Popup<GJGameLevel* const&> {
+class PausePopup : public geode::Popup<std::string const&> {
 protected:
-	bool setup(GJGameLevel* const& level) override;
+	bool setup(std::string const& levelID) override;
 public:
-	static PausePopup* create(GJGameLevel* const& level);
+	static PausePopup* create(std::string const& levelID);
 };

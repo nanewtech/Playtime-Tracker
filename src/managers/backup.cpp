@@ -1,20 +1,24 @@
 #include "./backup.hpp"
-#include <matjson.hpp>
 #include <fstream>
 
 using namespace geode::prelude;
 
-auto backupDir = Mod::get()->getSaveDir().string() + "/leveldata.backup";
-std::filesystem::path backupDirPath = std::filesystem::path(backupDir);
+static std::string getBackupDir() {
+	return Mod::get()->getSaveDir().string() + "/leveldata.backup";
+}
+
+static std::filesystem::path getBackupDirPath() {
+	return std::filesystem::path(getBackupDir());
+}
+
 
 bool Backup::fileExists() {
-	if (std::filesystem::exists(backupDirPath)) return true;
-	return false;
+	return std::filesystem::exists(getBackupDirPath());
 }
 
 matjson::Value Backup::getFile() {
 	if (Backup::fileExists()) {
-		std::ifstream i(backupDir);
+		std::ifstream i(getBackupDir());
 		auto data = matjson::parse(i).unwrap();
 		i.close();
 		return data;
@@ -26,7 +30,7 @@ matjson::Value Backup::getFile() {
 
 void Backup::writeFile(matjson::Value data) {
 	std::string output = data.dump(matjson::NO_INDENTATION);
-	std::ofstream o(backupDir);
+	std::ofstream o(getBackupDir());
 	o << output;
 	o.close();
 }

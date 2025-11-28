@@ -1,7 +1,7 @@
 #pragma once
-#define menuPopup_h
 
 #include <Geode/Geode.hpp>
+#include <string>
 
 using namespace geode::prelude;
 
@@ -11,5 +11,5 @@ protected:
 	bool setup(GJGameLevel* const& level) override;
 public:
 	static MenuPopup* create(GJGameLevel* const& level);
-	static CCMenu* SessionMenuElement(std::string levelID, int index);
+	static CCMenu* sessionMenuElement(std::string const& levelID, int index);
 };

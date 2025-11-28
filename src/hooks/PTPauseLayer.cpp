@@ -3,6 +3,7 @@
 #include <Geode/modify/PauseLayer.hpp>
 
 #include "../managers/data.hpp"
+#include "../layers/pausePopup.hpp"
 
 using namespace geode::prelude;
 
@@ -54,7 +55,7 @@ class $modify(PTPauseLayer, PauseLayer) {
 		log::debug("PauseLayer onResume() CALLED!!!!");
 		Data::resumeLevel(m_fields->m_levelID);
 
-		log::debug("IS NOT PAUSED!!!!");
+		log::debug("ON RESUME UNPAUSED!!!!");
 		Mod::get()->setSavedValue<bool>("is-paused", false);
 
 		PauseLayer::onResume(sender);
@@ -65,11 +66,16 @@ class $modify(PTPauseLayer, PauseLayer) {
 
 		// TODO: Make popup for pause menu, call it here
 
+		
+		PausePopup::create(m_fields->m_levelID)->show();
+
+		/*
 		auto playtime = Data::getSessionPlaytimeRaw(m_fields->m_levelID);
 			FLAlertLayer::create(
 				"Playtime Tracker",
 				CCString::create("Current Session: " + Data::formattedPlaytime(playtime))->getCString(),
 				"close")->show();
+		*/
 	}
 	void onPracticeMode(CCObject* sender) {
 
@@ -82,5 +88,13 @@ class $modify(PTPauseLayer, PauseLayer) {
 		Mod::get()->setSavedValue<bool>("is-paused", false);
 		Data::exitLevel(m_fields->m_levelID);
 		PauseLayer::onEdit(sender);
+	}
+
+	void onRestart(CCObject* sender) {
+			if (Mod::get()->getSavedValue<bool>("is-paused")) Data::resumeLevel(m_fields->m_levelID);
+			Mod::get()->setSavedValue<bool>("is-paused", false);
+			log::debug("RESTART LEVEL UNPAUSED!!!!!");
+
+			PauseLayer::onRestart(sender);
 	}
 };

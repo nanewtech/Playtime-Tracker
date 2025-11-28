@@ -8,8 +8,6 @@
 #include "../managers/data.hpp"
 #include "../managers/settings.hpp"
 
-using namespace geode::prelude;
-
 class OpenSettings : public CCLayer {
 public:
     void open(CCObject*) {
@@ -68,7 +66,7 @@ public:
 
 bool MenuPopup::setup(GJGameLevel* const& level) {
 	this->setTitle("Playtime Tracker");
-    this->setID("Playtime-Tracker-Popup");
+    this->setID("Playtime-Tracker-Popup"_spr);
 
     std::string levelID = std::to_string(EditorIDs::getID(level));
     if (level->m_levelType == GJLevelType::Editor) levelID = "Editor-" + levelID;
@@ -81,13 +79,11 @@ bool MenuPopup::setup(GJGameLevel* const& level) {
 
     m_mainLayer->addChild(subtitleLabel);
 
-    int totalPlaytime = Data::getPlaytimeRaw(levelID);
-    int sessionPlaytime = Data::getLatestSession(levelID);
 
 	auto totalTitle = CCLabelBMFont::create("Total Playtime:", "goldFont.fnt");
-    auto totalValue = CCLabelBMFont::create(CCString::create(Data::formattedPlaytime(totalPlaytime))->getCString(), "bigFont.fnt");
+    auto totalValue = CCLabelBMFont::create(CCString::create(Data::formattedPlaytime(Data::getPlaytimeRaw(levelID)))->getCString(), "bigFont.fnt");
     auto sessionTitle = CCLabelBMFont::create("Last Session:", "goldFont.fnt");
-    auto sessionValue = CCLabelBMFont::create(CCString::create(Data::formattedPlaytime(sessionPlaytime))->getCString(), "bigFont.fnt");
+    auto sessionValue = CCLabelBMFont::create(CCString::create(Data::formattedPlaytime(Data::getLatestSession(levelID)))->getCString(), "bigFont.fnt");
 
     totalTitle->setScale(0.75f);
     totalValue->setScale(0.35f);
@@ -104,12 +100,13 @@ bool MenuPopup::setup(GJGameLevel* const& level) {
     scrollbar->setPosition({ 278.f, 12.f });
 
     auto scrollBg = cocos2d::extension::CCScale9Sprite::create("square02b_001.png");
-    scrollBg->setAnchorPoint({ 0, 0 });
+    scrollBg->setAnchorPoint({ 0.f, 0.f });
     scrollBg->setColor({ 0, 0, 0 });
     scrollBg->setOpacity(128);
     scrollBg->setContentSize({ 280.f, 200.f });
     scrollBg->setID("content-bg");
-    m_mainLayer->addChildAtPosition(scrollBg, geode::Anchor::BottomLeft, { 10.f, 10.f });
+    scrollBg->setPosition({ 10.f, 10.f });
+    m_mainLayer->addChild(scrollBg);
 
 
     auto contentLayout = geode::AxisLayout::create(geode::Axis::Column);
@@ -133,9 +130,9 @@ bool MenuPopup::setup(GJGameLevel* const& level) {
 
 
     // data
-    std::string timeAttemptStat = Data::formattedPlaytime(Data::getPlaytimeRaw(levelID) / 1);
+    std::string timeAttemptStat = Data::formattedPlaytime(Data::getPlaytimeRaw(levelID));
     if (level->m_attempts != 0) timeAttemptStat = Data::formattedPlaytime(Data::getPlaytimeRaw(levelID) / level->m_attempts);
-    std::string timeSessionsStat = Data::formattedPlaytime(Data::getPlaytimeRaw(levelID) / 1);
+    std::string timeSessionsStat = Data::formattedPlaytime(Data::getPlaytimeRaw(levelID));
     if (Data::getSessionCount(levelID) != 0) timeSessionsStat = Data::formattedPlaytime(Data::getPlaytimeRaw(levelID) / Data::getSessionCount(levelID));
 
     auto statsLabel = CCLabelBMFont::create("Level Stats", "goldFont.fnt");
@@ -160,7 +157,7 @@ bool MenuPopup::setup(GJGameLevel* const& level) {
     sessionLabel->setScale(0.75f);
     content->addChild(sessionLabel);
     for (int i = Data::getSessionCount(levelID) - 1; i >= 0; i--) {
-        auto menu = SessionMenuElement(levelID, i);
+        auto menu = sessionMenuElement(levelID, i);
         menu->setID(fmt::format("session-{}", i + 1));
         content->addChild(menu);
     }
@@ -232,7 +229,7 @@ MenuPopup* MenuPopup::create(GJGameLevel* const& level) {
     return nullptr;
 }
 
-CCMenu* MenuPopup::SessionMenuElement(std::string levelID, int index) {
+CCMenu* MenuPopup::sessionMenuElement(std::string const& levelID, int index) {
     auto menu = CCMenu::create();
     menu->setContentSize({ 265.f, 25.f });
     menu->setTag(index);

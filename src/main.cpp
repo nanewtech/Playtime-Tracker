@@ -3,6 +3,6 @@
 using namespace geode::prelude;
 
 
-$execute{
+$on_mod (Loaded){
 	Mod::get()->setSavedValue<bool>("is-paused", false);
 }
