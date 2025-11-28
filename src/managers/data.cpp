@@ -206,6 +206,7 @@ int Data::getPlaytimeRaw(std::string const& levelID) {
     catch (const geode::UnwrapException&) {
         return playtime;
     }
+    return playtime;
 }
 
 std::string Data::formattedPlaytime(int playtime) {
