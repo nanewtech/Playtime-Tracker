@@ -148,9 +148,10 @@ int Data::getLatestSession(std::string const& levelID) {
 
     time_t timestamp;
     try {
-
+        int index = 0;
         for (auto& currPair : latestSession) {
             if (currPair.size() >= 2) playtime += currPair[1].asInt().unwrap() - currPair[0].asInt().unwrap();
+            else Data::fixSessionAtIndex(levelID, sessions.size() - 1);
         }
         return playtime;
     }
@@ -202,16 +203,16 @@ int Data::getPlaytimeRaw(std::string const& levelID) {
         if (latestPair[0].isExactlyUInt() && latestPair.size() == 1) {
             return time(&timestamp) - latestPair[0].asInt().unwrap();
         }
+        for (auto& session : sessions) {
+            for (auto& currPair : session) {
+                playtime += currPair[1].asInt().unwrap() - currPair[0].asInt().unwrap();
+            }
+        }
+        return playtime;
     }
     catch (const geode::UnwrapException&) {
         return playtime;
     }
-    for (auto& session : sessions) {
-        for (auto& currPair : session) {
-            playtime += currPair[1].asInt().unwrap() - currPair[0].asInt().unwrap();
-        }
-    }
-    return playtime;
 }
 
 std::string Data::formattedPlaytime(int playtime) {
@@ -277,11 +278,16 @@ tm* Data::getLastPlayedRaw(std::string const& levelID) {
 tm* Data::getPlayedRawAtIndex(std::string const& levelID, int index) {
     auto data = getFile();
     time_t timestamp = time(0);
-        
-    int sessionStart = data[levelID]["sessions"][index][0][0].asInt().unwrap();
-    timestamp = static_cast<time_t>(sessionStart);
+    try {
+        int sessionStart = data[levelID]["sessions"][index][0][0].asInt().unwrap();
+        timestamp = static_cast<time_t>(sessionStart);
 
-    return localtime(&timestamp);
+        return localtime(&timestamp);
+    }
+    catch (const geode::UnwrapException&) {
+        Data::deleteSessionAtIndex(levelID, index);
+        return localtime(&timestamp);
+    }
 }
 
 int Data::getSessionPlaytimeRawAtIndex(std::string const& levelID, int index) {
@@ -332,19 +338,20 @@ void Data::deleteLevelData(std::string const& levelID) {
 
 void Data::deleteSessionAtIndex(std::string const& levelID, int index) {
     auto data = getFile();
+    auto& sessions = data[levelID]["sessions"];
 
-    if (data[levelID]["sessions"].size() == 1) {
+    if (sessions.size() == 1) {
         deleteLevelData(levelID);
     } else {
-        data[levelID]["sessions"][index] = NULL;
+        sessions[index] = NULL;
 
-        auto sessions = matjson::Value::array();
+        auto newSessions = matjson::Value::array();
 
-        for (auto& currItem : data[levelID]["sessions"]) {
-            if (!currItem[0].isNull()) sessions.push(currItem);
+        for (auto& currItem : sessions) {
+            if (!currItem[0].isNull()) newSessions.push(currItem);
         }
 
-        data[levelID]["sessions"] = sessions;
+        sessions = newSessions;
 
         writeFile(data);
     }
@@ -353,13 +360,14 @@ void Data::deleteSessionAtIndex(std::string const& levelID, int index) {
 void Data::fixSessionAtIndex(std::string const& levelID, int index) {
     auto data = getFile();
 
-        auto session = matjson::Value::array();
-
-        for (auto& currPair : data[levelID]["sessions"][index]) {
-            if (currPair.size() >= 2) session.push(currPair);
+        auto newSession = matjson::Value::array();
+        auto& session = data[levelID]["sessions"][index];
+        for (auto& currPair : session) {
+            if (currPair.size() >= 2) newSession.push(currPair);
         }
+        session = newSession;
 
-        data[levelID]["sessions"][index] = session;
+        if (newSession.size() == 0) Data::deleteSessionAtIndex(levelID, index);
 
         writeFile(data);
 }
