@@ -36,7 +36,7 @@ void Backup::writeFile(matjson::Value data) {
 }
 
 void Backup::createBackup(matjson::Value data) {
-	log::debug("Creating backup of levelData");
+	log::info("CREATING BACKUP OF LEVELDATA!");
 	Backup::writeFile(data);
 }
 

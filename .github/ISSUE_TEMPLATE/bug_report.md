@@ -11,6 +11,9 @@ assignees: ''
  - OS: [e.g. iOS, Windows]
  - Version [e.g. 1.0.0]
 
+**Enabled Settings**
+List any settings that *aren't* sent to the default value
+
 **Steps To Reproduce**
 1. Go to '...'
 2. Click on '....'

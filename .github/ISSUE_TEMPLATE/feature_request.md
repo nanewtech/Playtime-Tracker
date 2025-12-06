@@ -10,7 +10,7 @@ assignees: ''
 **What is your feature?**
 describe the basic idea
 
-**Which feature (if any) does it extend)?**
+**Which feature (if any) does it extend?**
 Try to describe or name what it would extend
 
 **Describe the feature**

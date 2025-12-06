@@ -71,7 +71,7 @@ bool MenuPopup::setup(GJGameLevel* const& level) {
     std::string levelID = std::to_string(EditorIDs::getID(level));
     if (level->m_levelType == GJLevelType::Editor) levelID = "Editor-" + levelID;
 
-    std::string levelName = level->m_levelName.c_str();
+    std::string levelName = level->m_levelName;
 
     auto subtitleLabel = CCLabelBMFont::create(CCString::create(levelName + " - Sessions: " + std::to_string(Data::getSessionCount(levelID)))->getCString(), "goldFont.fnt");
     subtitleLabel->setScale(0.5f);

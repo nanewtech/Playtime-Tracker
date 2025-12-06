@@ -21,24 +21,15 @@ class $modify(PTPlayLayer, PlayLayer) {
 		time_t timestamp;
 
 		Mod::get()->setSavedValue<bool>("is-paused", false);
-		log::debug("INIT UNPAUSED!!!!!");
 
 		Mod::get()->setSavedValue<int>("current-level-best", level->m_normalPercent.value());
 
 		m_fields->m_levelID = std::to_string(EditorIDs::getID(level));
 
 		if (level->m_levelType == GJLevelType::Editor) m_fields->m_levelID = "Editor-" + std::to_string(EditorIDs::getID(level));
-		log::debug("EDITOR ID: {}", EditorIDs::getID(level));
-		log::debug("LEVEL ID FIELD: {}", m_fields->m_levelID);
 
 		Mod::get()->setSavedValue<std::string>("current-level-id", m_fields->m_levelID);
 
-		log::debug("LEVEL ID SAVED VALUE: {}", Mod::get()->getSavedValue<std::string>("current-level-id"));
-
-
-		log::debug("STARTED LEVEL: {}", fmt::to_string(Mod::get()->getSavedValue<std::string>("current-level-id")));
-		log::debug("STARTED LEVEL AT: {}", fmt::to_string(time(&timestamp)));
-		
 		Data::startLevel(m_fields->m_levelID);
 
 		return true;
@@ -49,8 +40,6 @@ class $modify(PTPlayLayer, PlayLayer) {
 		
 		Data::pauseLevel(m_fields -> m_levelID);
 
-		log::debug("PLAYLAYER levelComplete() CALLED!!!!");
-
 		PlayLayer::levelComplete();
 	}
 
@@ -58,9 +47,7 @@ class $modify(PTPlayLayer, PlayLayer) {
 		Data::exitLevel(m_fields->m_levelID);
 
 		time_t timestamp;
-		log::debug("QUIT AT: {}", fmt::to_string(time(&timestamp)));
 
-		log::debug("PLAYLAYER onQuit() CALLED!!!!");
 		Mod::get()->setSavedValue<bool>("is-paused", false);
 		PlayLayer::onQuit();
 	}

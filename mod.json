@@ -8,7 +8,7 @@
 	},
 	"id": "nanew.playtime-tracker",
 	"name": "Playtime Tracker",
-	"version": "v1.0.0",
+	"version": "v1.0.1",
 	"developer": "nanew",
 	"description": "Track your playtime on levels!",
 	"dependencies": {
@@ -22,37 +22,37 @@
 		"general-title":{
 			"type": "title",
 			"name": "General Settings",
-			"description": "These settings dictate the basic functionality of Playtime Tracker, you will probably find most useful settings here!"
+			"description": "These settings dictate the <cy>basic functionality</c> of Playtime Tracker, you will probably find most useful settings here!"
 		},
 		"remove-pauses": {
 			"type": "bool",
 			"name": "Remove pauses from Playtime",
-			"description": "If enabled, removes the time you spend in the pause menu from your playtime. This also removes the time you spend at the 'Level Complete' screen",
+			"description": "<cg>If enabled</c>, removes the time you spend in the pause menu from your playtime. <cy>This also removes the time you spend at the 'Level Complete' screen<c/>",
 			"default":false
 		},
 		"stop-completion":{
 			"type": "bool",
 			"name": "Stop tracking after completion",
-			"description": "When enabled, the mod will stop tracking your playtime on every level where you have 100% in normal mode. ON EDITOR LEVELS: Make sure you reset your best if you complete it while building to track your playtime when you verify your level.",
+			"description": "<cg>When enabled</c>, the mod will stop tracking your playtime on every level where you have <cy>100% in normal mode</c>. <cr>ON EDITOR LEVELS</c>: Make sure you reset your best if you complete it while building to track your playtime when you verify your level.",
 			"default":false
 		},
 		"short-text":{
 			"type": "bool",
 			"name": "Use short playtime text",
-			"description": "If enabled, uses a short version of the playtime, e.g. Xd Xh Xm Xs. When disabled, writes out the formats, e.g. X Days, X Hours, X Minutes, X Seconds.",
+			"description": "<cg>If enabled</c>, uses a short version of the playtime, e.g. <cj>Xd Xh Xm Xs.</c> <cg>When disabled</c>, writes out the formats, e.g. <cj>X Days, X Hours, X Minutes, X Seconds.</c>",
 			"default":true
 		},
 		"highest-convert":{
 			"type": "string",
 			"name": "Convert playtime up to",
-			"description": "Whenever you check your playtime, the mod will convert it up to the selected unit, e.g. if you select \"Hours\", you will see your playtime converted to hours, minutes and seconds whereas if you select \"Days\", you get your playtime converted to days, hours, minutes and seconds.",
+			"description": "Whenever you check your playtime, the mod will convert it <cy>up to the selected unit</c>, e.g. if you select \"Hours\", you will see your playtime converted to <cj>hours, minutes and seconds</c> whereas if you select \"Days\", you get your playtime converted to <cj>days, hours, minutes and seconds.</c>",
 			"one-of": ["Days", "Hours", "Minutes", "Seconds"],
 			"default": "Hours"
 		},
 		"infoLayer-position":{
 			"type": "string",
 			"name": "Menu button position",
-			"description": "Decide if the button on the level info page should appear above the favorites or on the left side of the screen. BOTTOM CAN LEAD TO ISSUES!",
+			"description": "Decide if the button on the level info page should appear above the favorites or on the left side of the screen. <cr>CHOOSING BOTTOM CAN LEAD TO VISUAL ISSUES (OVERLAPPING BUTTONS)!</c>",
 			"one-of": ["Bottom", "Left"],
 			"default": "Left"
 		},
@@ -65,15 +65,7 @@
 		"time-title":{
 			"type": "title",
 			"name": "Time format settings",
-			"description": "These settings relate to the way Playtime Tracker displays at what time your sessions happened (in the popup on the level select screens)!"
-		},
-		"time-format":{
-			"type":"string",
-			"name": "Use preset time format",
-			"one-of": ["EU", "USA", "ISO"],
-			"default":"ISO",
-			"enable-if": "!(use-custom-time-format)",
-			"enable-if-description": "Disable \"Use custom time format\""
+			"description": "These settings relate to the way Playtime Tracker <cy>displays at what time your sessions happened</c> (in the popup on the level select screens)!"
 		},
 		"use-custom-time-format":{
 			"type": "bool",
@@ -81,14 +73,22 @@
 			"description": "Enables the option to enter your own custom time foramt",
 			"default":false
 		},
+		"time-format":{
+			"type":"string",
+			"name": "Preset time format",
+			"one-of": ["EU", "USA", "ISO"],
+			"default":"ISO",
+			"enable-if": "!(use-custom-time-format)",
+			"enable-if-description": "Disable \"Use custom time format\""
+		},
 		"custom-time-format":{
 			"type": "string",
 			"name": "Custom time format",
-			"description": "Enter your Custom time format! Reference to posible keys to use are in the following link (example: %d.%m.%Y %T for EU format) https://cppreference.com/w/cpp/chrono/c/strftime.html",
+			"description": "Enter your Custom time format! Reference to posible keys to use are in the following link <cj>(example: %d.%m.%Y %T for EU format)</c> https://cppreference.com/w/cpp/chrono/c/strftime.html",
 			"filter": "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890!@#$%^&*()_+-=[]{};:,.<> ",
 			"enable-if": "use-custom-time-format",
 			"enable-if-description": "Enable \"Use custom time format\"",
-			"default":""
+			"default":"%F %T"
 		}
 	},
 	"links": {

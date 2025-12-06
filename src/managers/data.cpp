@@ -72,8 +72,6 @@ void Data::startLevel(std::string const& levelID) {
 
     if (!(sessions.isArray())) sessions = matjson::Value::array(); 
 
-    log::debug("START LEVEL CALLED");
-
     sessions.push(matjson::Value::array());
 
     auto& latestSession = sessions[sessions.size() - 1];
