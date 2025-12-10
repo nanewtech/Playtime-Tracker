@@ -8,7 +8,7 @@
 	},
 	"id": "nanew.playtime-tracker",
 	"name": "Playtime Tracker",
-	"version": "v1.0.2",
+	"version": "v1.0.3",
 	"developer": "nanew",
 	"description": "Track your playtime on levels!",
 	"dependencies": {

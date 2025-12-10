@@ -1,3 +1,5 @@
+# v1.0.3
+- Codebase improvements and index requirements (#1)
 # v1.0.2
 - fixed a bug where gd would crash on mobile when clicking on the button in the pause menu
 # v1.0.1
