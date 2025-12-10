@@ -5,11 +5,11 @@
 
 using namespace geode::prelude;
 
-class MenuPopup : public geode::Popup<GJGameLevel* const&> {
+class MenuPopup : public geode::Popup<GJGameLevel*> {
 protected:
 	GJGameLevel* m_level;
-	bool setup(GJGameLevel* const& level) override;
+	bool setup(GJGameLevel* level) override;
 public:
-	static MenuPopup* create(GJGameLevel* const& level);
+	static MenuPopup* create(GJGameLevel* level);
 	static CCMenu* sessionMenuElement(std::string const& levelID, int index);
 };

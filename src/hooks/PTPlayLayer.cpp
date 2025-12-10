@@ -24,15 +24,27 @@ class $modify(PTPlayLayer, PlayLayer) {
 
 		Mod::get()->setSavedValue<int>("current-level-best", level->m_normalPercent.value());
 
-		m_fields->m_levelID = std::to_string(EditorIDs::getID(level));
+		m_fields->m_levelID = fmt::to_string(EditorIDs::getID(level));
 
-		if (level->m_levelType == GJLevelType::Editor) m_fields->m_levelID = "Editor-" + std::to_string(EditorIDs::getID(level));
+		if (level->m_levelType == GJLevelType::Editor) m_fields->m_levelID = fmt::format("Editor-{}", EditorIDs::getID(level));
 
 		Mod::get()->setSavedValue<std::string>("current-level-id", m_fields->m_levelID);
 
 		Data::startLevel(m_fields->m_levelID);
 
 		return true;
+	}
+
+	void resume() {
+		Data::resumeLevel(m_fields->m_levelID);
+		Mod::get()->setSavedValue<bool>("is-paused", false);
+		PlayLayer::resume();
+	}
+
+	void togglePracticeMode(bool practiceMode) {
+		Data::resumeLevel(m_fields->m_levelID);
+		Mod::get()->setSavedValue<bool>("is-paused", false);
+		PlayLayer::togglePracticeMode(practiceMode);
 	}
 
 	void levelComplete() {

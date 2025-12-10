@@ -26,9 +26,9 @@ bool PausePopup::setup(std::string const& levelID) {
 
 
     auto totalPlaytime = Data::getPlaytimeRaw(levelID);
-    auto totalLabel = CCLabelBMFont::create(CCString::create(Data::formattedPlaytime(Data::getTotalPlaytime(levelID)))->getCString(), "bigFont.fnt");
+    auto totalLabel = CCLabelBMFont::create(Data::formattedPlaytime(Data::getTotalPlaytime(levelID)).c_str(), "bigFont.fnt");
     auto playtime = Data::getSessionPlaytimeRaw(levelID);
-    auto playtimeLabel = CCLabelBMFont::create(CCString::create(Data::formattedPlaytime(playtime))->getCString() , "bigFont.fnt");
+    auto playtimeLabel = CCLabelBMFont::create(Data::formattedPlaytime(playtime).c_str() , "bigFont.fnt");
     playtimeLabel->setScale(0.375f);
     totalLabel->setScale(0.375f);
 

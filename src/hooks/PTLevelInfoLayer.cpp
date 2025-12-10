@@ -15,6 +15,7 @@ using namespace geode::prelude;
 class $modify(PTLevelInfoLayer, LevelInfoLayer) {
 	struct Fields {
 		GJGameLevel* m_level;
+		std::string m_levelID;
 	};
 	
 
@@ -41,7 +42,7 @@ class $modify(PTLevelInfoLayer, LevelInfoLayer) {
 
 		playtimeButton->setID("playtime-tracker-button");
 		// playtimeButton->setTag(level->m_levelID.value());
-		playtimeButton->setUserObject(CCString::create(std::to_string(EditorIDs::getID(level))));
+		m_fields->m_levelID = fmt::to_string(EditorIDs::getID(level));
 		playtimeButton->setZOrder(1);
 
 
@@ -83,10 +84,8 @@ class $modify(PTLevelInfoLayer, LevelInfoLayer) {
 
 	void onPlaytimeButton(CCObject* sender) {
 
-		auto obj = static_cast<CCNode*>(sender)->getUserObject();
-
-		auto totalPlaytime = Data::getPlaytimeRaw(static_cast<CCString*>(obj)->getCString());
-		auto lastPlaytime = Data::getLatestSession(static_cast<CCString*>(obj)->getCString());
+		auto totalPlaytime = Data::getPlaytimeRaw(m_fields->m_levelID);
+		auto lastPlaytime = Data::getLatestSession(m_fields->m_levelID);
 		
 		// log::debug("Playtime Raw: {}", fmt::to_string(playtime));
 		// log::debug("Playtime Formatted: {}", fmt::to_string(data::formattedPlaytime(playtime, false)));

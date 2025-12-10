@@ -4,11 +4,11 @@
 
 class Backup {
 protected:
-	static void writeFile(matjson::Value data);
+	static void writeFile(matjson::Value const& data);
 
 public:
 	static matjson::Value getFile();
 	static bool fileExists();
-	static void createBackup(matjson::Value data);
+	static void createBackup(matjson::Value const& data);
 	static void loadBackup();
 };

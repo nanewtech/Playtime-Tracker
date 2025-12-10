@@ -47,7 +47,7 @@ class $modify(PTPauseLayer, PauseLayer) {
 		PauseLayer::onQuit(sender);
 	}
 	*/
-	void onResume(CCObject* sender) {
+	/* void onResume(CCObject* sender) {
 		time_t timestamp;
 
 		Data::resumeLevel(m_fields->m_levelID);
@@ -55,7 +55,7 @@ class $modify(PTPauseLayer, PauseLayer) {
 		Mod::get()->setSavedValue<bool>("is-paused", false);
 
 		PauseLayer::onResume(sender);
-	}
+	} */
 	void onPtButton(CCObject* sender) {
 
 		// auto btn = static_cast<CCMenuItemSpriteExtra*>(sender);
@@ -73,12 +73,12 @@ class $modify(PTPauseLayer, PauseLayer) {
 				"close")->show();
 		*/
 	}
-	void onPracticeMode(CCObject* sender) {
+	/* void onPracticeMode(CCObject* sender) {
 
 		Data::resumeLevel(m_fields->m_levelID);
 		Mod::get()->setSavedValue<bool>("is-paused", false);
 		PauseLayer::onPracticeMode(sender);
-	}
+	} */
 
 	void onEdit(CCObject* sender) {
 		Mod::get()->setSavedValue<bool>("is-paused", false);

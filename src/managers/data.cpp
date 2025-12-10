@@ -2,28 +2,20 @@
 #include "./settings.hpp"
 #include "./backup.hpp"
 
-#include <fstream>
-
 
 using namespace geode::prelude;
 
-std::string getDataDir() {
-    return Mod::get()->getSaveDir().string() + "/leveldata.json";
-}
-
 std::filesystem::path getDataDirPath() {
-    return std::filesystem::path(getDataDir());
+    return Mod::get()->getSaveDir() / "leveldata.json";
 }
 
 bool Data::fileExists() {
     return std::filesystem::exists(getDataDirPath());
 }
 
-void writeFile(matjson::Value data) {
+void writeFile(matjson::Value const& data) {
     std::string output = data.dump(matjson::NO_INDENTATION); //lowkey just no indentation cause it makes editing the file harder = less "cheating" :skull: @mizuki :eyes: :eyes:
-    std::ofstream o(getDataDirPath());
-    o << output;
-    o.close();
+    (void)file::writeString(getDataDirPath(), output);
 }
 
 static void initializeFile() {
@@ -34,13 +26,10 @@ static void initializeFile() {
 
 matjson::Value Data::getFile() {
     if (Data::fileExists()) {
-        try {
-            std::ifstream i(getDataDir());
-            auto data = matjson::parse(i).unwrap();
-            i.close();
-            return data;
+        if (auto data = file::readJson(getDataDirPath())) {
+            return data.unwrap();
         }
-        catch (const geode::UnwrapException&) {
+        else {
             log::info("LEVELDATA BROKEN, LOADING BACKUP");
             Backup::loadBackup();
         }
@@ -145,18 +134,20 @@ int Data::getLatestSession(std::string const& levelID) {
     auto& latestSession = sessions[sessions.size() - 1];
 
     time_t timestamp;
-    try {
-        int index = 0;
-        for (auto& currPair : latestSession) {
-            if (currPair.size() >= 2) playtime += currPair[1].asInt().unwrap() - currPair[0].asInt().unwrap();
-            else Data::fixSessionAtIndex(levelID, sessions.size() - 1);
+
+    int index = 0;
+    for (auto& currPair : latestSession) {
+        if (currPair.size() >= 2) {
+            if (!currPair[0].isNumber() || !currPair[1].isNumber()) {
+                Backup::loadBackup();
+                return playtime;
+            }
+            playtime += currPair[1].asInt().unwrap() - currPair[0].asInt().unwrap();
         }
-        return playtime;
+        else Data::fixSessionAtIndex(levelID, sessions.size() - 1);
     }
-    catch (const geode::UnwrapException&) {
-        Backup::loadBackup();
-        return playtime;
-    }
+    return playtime;
+
 }
 
 int Data::getSessionPlaytimeRaw(std::string const& levelID) {
@@ -168,13 +159,10 @@ int Data::getSessionPlaytimeRaw(std::string const& levelID) {
     auto& latestSession = sessions[sessions.size() - 1];
 
     time_t timestamp;
-    try {
-        if (Settings::getRemovePauses()) return getLatestSession(levelID);
+    if (Settings::getRemovePauses()) return getLatestSession(levelID);
 
-        return time(&timestamp) - latestSession[latestSession.size() - 1][0].asInt().unwrap();
-    } catch (const geode::UnwrapException&) {
-        return playtime;
-    }
+    auto& latestTime = latestSession[latestSession.size() - 1][0];
+    return latestTime.isNumber() ? time(&timestamp) - latestTime.asInt().unwrap() : playtime;
 }
 
 // do this inside level
@@ -188,37 +176,34 @@ int Data::getPlaytimeRaw(std::string const& levelID) {
     auto& latestPair = latestSession[latestSession.size() - 1];
 
     if (!(sessionsInitialized(levelID))) return playtime;
-    try {
-        if (Settings::getRemovePauses()) {
-            for (auto& session : sessions) {
-                for (auto& currPair : session) {
-                    playtime += currPair[1].asInt().unwrap() - currPair[0].asInt().unwrap();
-                }
-            }
-            return playtime;
-        }
-        time_t timestamp;
-        if (latestPair[0].isExactlyUInt() && latestPair.size() == 1) {
-            return (time(&timestamp) - latestPair[0].asInt().unwrap());
-        }
+    if (Settings::getRemovePauses()) {
         for (auto& session : sessions) {
             for (auto& currPair : session) {
+                if (!currPair[0].isNumber() || !currPair[1].isNumber()) return playtime;
                 playtime += currPair[1].asInt().unwrap() - currPair[0].asInt().unwrap();
             }
         }
         return playtime;
     }
-    catch (const geode::UnwrapException&) {
-        return playtime;
+    time_t timestamp;
+    if (latestPair[0].isNumber() && latestPair.size() == 1) {
+        return (time(&timestamp) - latestPair[0].asInt().unwrap());
     }
+    for (auto& session : sessions) {
+        for (auto& currPair : session) {
+            if (!currPair[0].isNumber() || !currPair[1].isNumber()) return playtime;
+            playtime += currPair[1].asInt().unwrap() - currPair[0].asInt().unwrap();
+        }
+    }
+    return playtime;
 }
 
 std::string Data::formattedPlaytime(int playtime) {
     int days = 0;
     int hours = 0;
     int minutes = 0;
-    std::string formatted = "";
-    std::list<std::string> suffix = { "d ", "h ", "m ", "s" };
+    fmt::memory_buffer formatted;
+    std::array<std::string_view, 4> suffix = { "d ", "h ", "m ", "s" };
 
     if (!Settings::getShortText())  suffix = { " Days, ", " Hours, ", " Minutes, ", " Seconds" };
 
@@ -228,34 +213,34 @@ std::string Data::formattedPlaytime(int playtime) {
         days = playtime / 86400;
         if (days > 0) {
             playtime -= days * 86400;
-            if (days == 1 && !Settings::getShortText()) formatted += std::to_string(days) + " Day, ";
-            if (days > 1 || Settings::getShortText()) formatted += std::to_string(days) + *suffix.begin();
+            if (days == 1 && !Settings::getShortText()) fmt::format_to(std::back_inserter(formatted), "{} Day, ", days);
+            if (days > 1 || Settings::getShortText()) fmt::format_to(std::back_inserter(formatted), "{}{}", days, suffix[0]);
         }
     }
     if (Settings::getHighestConvert() == "Days" || Settings::getHighestConvert() == "Hours") {
         hours = playtime / 3600;
         if (hours > 0) {
             playtime -= hours * 3600;
-            if (hours == 1 && !Settings::getShortText()) formatted += std::to_string(hours) + " Hour, ";
-            if (hours > 1 || Settings::getShortText()) formatted += std::to_string(hours) + *next(suffix.begin(), 1);
+            if (hours == 1 && !Settings::getShortText()) fmt::format_to(std::back_inserter(formatted), "{} Hour, ", hours);
+            if (hours > 1 || Settings::getShortText()) fmt::format_to(std::back_inserter(formatted), "{}{}", hours, suffix[1]);
         }
     }
     if (!(Settings::getHighestConvert() == "Seconds")) {
         minutes = playtime / 60;
         if (minutes > 0) {
             playtime -= minutes * 60;
-            if (minutes == 1 && !Settings::getShortText()) formatted += std::to_string(minutes) + " Minute, "; // grammar......
-            if (minutes > 1 || Settings::getShortText()) formatted += std::to_string(minutes) + *next(suffix.begin(), 2);
+            if (minutes == 1 && !Settings::getShortText()) fmt::format_to(std::back_inserter(formatted), "{} Minute, ", minutes); // grammar......
+            if (minutes > 1 || Settings::getShortText()) fmt::format_to(std::back_inserter(formatted), "{}{}", minutes, suffix[2]);
         }
     }
     // grammar........ :hugefrownyface:
     if (playtime == 1 && !Settings::getShortText()) { 
-        formatted += "1 Second";
-        return formatted;
+        fmt::format_to(std::back_inserter(formatted), "1 Second");
+        return fmt::to_string(formatted);
     }
-        formatted += std::to_string(playtime) + *next(suffix.begin(), 3);
+        fmt::format_to(std::back_inserter(formatted), "{}{}", playtime, suffix[3]);
 
-        return formatted;
+        return fmt::to_string(formatted);
 }
 
 tm* Data::getLastPlayedRaw(std::string const& levelID) {
@@ -266,7 +251,7 @@ tm* Data::getLastPlayedRaw(std::string const& levelID) {
     auto& latestSession = sessions[sessions.size() - 1];
     auto& latestPair = latestSession[latestSession.size() - 1];
 
-    if (latestPair[0].isExactlyUInt()) {
+    if (latestPair[0].isNumber()) {
         int sessionStart = latestPair[0].asInt().unwrap();
         timestamp = static_cast<time_t>(sessionStart);
     }
@@ -276,13 +261,14 @@ tm* Data::getLastPlayedRaw(std::string const& levelID) {
 tm* Data::getPlayedRawAtIndex(std::string const& levelID, int index) {
     auto data = getFile();
     time_t timestamp = time(0);
-    try {
+    auto& sessionValue = data[levelID]["sessions"][index][0][0];
+    if (sessionValue.isNumber()) {
         int sessionStart = data[levelID]["sessions"][index][0][0].asInt().unwrap();
         timestamp = static_cast<time_t>(sessionStart);
 
         return localtime(&timestamp);
     }
-    catch (const geode::UnwrapException&) {
+    else {
         Data::deleteSessionAtIndex(levelID, index);
         return localtime(&timestamp);
     }
@@ -291,26 +277,24 @@ tm* Data::getPlayedRawAtIndex(std::string const& levelID, int index) {
 int Data::getSessionPlaytimeRawAtIndex(std::string const& levelID, int index) {
     auto data = getFile();
     int playtime = 0;
-   try {
-        for (auto& currPair : data[levelID]["sessions"][index]) {
-            if (currPair.size() >= 2) {
-                playtime += currPair[1].asInt().unwrap() - currPair[0].asInt().unwrap();
+    for (auto& currPair : data[levelID]["sessions"][index]) {
+        if (currPair.size() >= 2) {
+            if (!currPair[0].isNumber() || !currPair[1].isNumber()) {
+                Backup::loadBackup();
+                return -1;
             }
-            else {
-                Data::fixSessionAtIndex(levelID, index);
-            }
+            playtime += currPair[1].asInt().unwrap() - currPair[0].asInt().unwrap();
         }
-        return playtime;
+        else {
+            Data::fixSessionAtIndex(levelID, index);
+        }
     }
-    catch (const geode::UnwrapException&) {
-        Backup::loadBackup();
-        return -1;
-    }
+    return playtime;
 }
 
 std::string Data::getPlayedFormatted(tm* localTimestamp) {
     
-    auto timeformat = CCString::create(Settings::getCustomTimeFormat())->getCString();
+    auto timeformat = Settings::getCustomTimeFormat();
     if (!(Settings::getUseCustomTimeFormat())) {
         if (Settings::getTimeFormat() == "ISO") timeformat = "%F %T";
         if (Settings::getTimeFormat() == "USA") timeformat = "%m/%d/%Y %r";
@@ -319,7 +303,7 @@ std::string Data::getPlayedFormatted(tm* localTimestamp) {
         
     char formatted[64];
 
-    strftime(formatted, sizeof(formatted), timeformat, localTimestamp);
+    strftime(formatted, sizeof(formatted), timeformat.c_str(), localTimestamp);
     return formatted;
 }
 
@@ -377,16 +361,17 @@ int Data::getTotalPlaytime(std::string const& levelID) {
 
     int playtime = 0;
 
-    try {
-        for (auto& currSession : sessions) {
-            for (auto& currPair : currSession) {
-                if (currPair.size() >= 2) playtime += currPair[1].asInt().unwrap() - currPair[0].asInt().unwrap();
-                if (currPair.size() == 1) playtime += time(&timestamp) - currPair[0].asInt().unwrap();
+    for (auto& currSession : sessions) {
+        for (auto& currPair : currSession) {
+            if (currPair.size() >= 2) {
+                if (!currPair[0].isNumber() || !currPair[1].isNumber()) return playtime;
+                playtime += currPair[1].asInt().unwrap() - currPair[0].asInt().unwrap();
+            }
+            if (currPair.size() == 1) {
+                if (!currPair[0].isNumber()) return playtime;
+                playtime += time(&timestamp) - currPair[0].asInt().unwrap();
             }
         }
-        return playtime;
     }
-    catch (const geode::UnwrapException&) {
-        return playtime;
-    }
+    return playtime;
 }
