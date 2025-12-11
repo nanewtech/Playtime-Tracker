@@ -6,6 +6,7 @@
 
 #include "../managers/data.hpp"
 #include "../managers/backup.hpp"
+#include "../managers/settings.hpp"
 
 using namespace geode::prelude;
 
@@ -30,8 +31,17 @@ class $modify(PTPlayLayer, PlayLayer) {
 
 		Mod::get()->setSavedValue<std::string>("current-level-id", m_fields->m_levelID);
 
-		Data::startLevel(m_fields->m_levelID);
+		if (Settings::getSessionType() == "Exit Game") {
+			if (Data::isLevelPlayedSession(m_fields->m_levelID)) {
+				Data::resumeLevel(m_fields->m_levelID);
+				return true;
+			}
+			else {
+				Data::appendPlayedLevel(m_fields->m_levelID);
+			}
+		}
 
+		Data::startLevel(m_fields->m_levelID);
 		return true;
 	}
 
@@ -39,12 +49,6 @@ class $modify(PTPlayLayer, PlayLayer) {
 		Data::resumeLevel(m_fields->m_levelID);
 		Mod::get()->setSavedValue<bool>("is-paused", false);
 		PlayLayer::resume();
-	}
-
-	void togglePracticeMode(bool practiceMode) {
-		Data::resumeLevel(m_fields->m_levelID);
-		Mod::get()->setSavedValue<bool>("is-paused", false);
-		PlayLayer::togglePracticeMode(practiceMode);
 	}
 
 	void levelComplete() {

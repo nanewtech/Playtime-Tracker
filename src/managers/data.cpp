@@ -5,6 +5,8 @@
 
 using namespace geode::prelude;
 
+std::unordered_set<std::string> playedIDs;
+
 std::filesystem::path getDataDirPath() {
     return Mod::get()->getSaveDir() / "leveldata.json";
 }
@@ -30,16 +32,16 @@ matjson::Value Data::getFile() {
             return data.unwrap();
         }
         else {
-            log::info("LEVELDATA BROKEN, LOADING BACKUP");
+            log::info("Leveldata.json broken, Loading backup!");
             Backup::loadBackup();
         }
     }
     if (Backup::fileExists()) {
-        log::info("FILE DOESNT EXIST, LOADING BACKUP");
+        log::info("Leveldata.json doesn't exist, Loading backup!");
         Backup::loadBackup();
         return Backup::getFile();
     }
-        log::info("BACKUP DOESNT EXIST, CREATING EMPTY FILE");
+        log::info("backup doesn't exist, Creating empty leveldata.json!");
         initializeFile();
         matjson::Value data;
         return data;
@@ -101,6 +103,11 @@ void Data::resumeLevel(std::string const& levelID) {
 
     auto& sessions = data[levelID]["sessions"];
     auto& latestSession = sessions[sessions.size() - 1];
+
+    if (sessions.size() <= 0) {
+        Data::startLevel(levelID);
+        return;
+    }
 
     latestSession.push(matjson::Value::array());
     latestSession[latestSession.size() - 1].push(time(&timestamp));
@@ -374,4 +381,12 @@ int Data::getTotalPlaytime(std::string const& levelID) {
         }
     }
     return playtime;
+}
+
+bool Data::isLevelPlayedSession(std::string const& levelID) {
+    return playedIDs.find(levelID) != playedIDs.end();
+}
+
+void Data::appendPlayedLevel(std::string const& levelID) {
+    playedIDs.insert(levelID);
 }

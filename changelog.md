@@ -1,3 +1,8 @@
+# v1.0.4
+- added an option to have the session end at game exit or level exit
+- made "remove pauses from playtime" on by default
+- fixed minor issue with the session continuing twice after resuming
+- changed about page to include feature suggestion
 # v1.0.3
 - Codebase improvements and index requirements (#1)
 # v1.0.2

@@ -8,7 +8,7 @@
 	},
 	"id": "nanew.playtime-tracker",
 	"name": "Playtime Tracker",
-	"version": "v1.0.3",
+	"version": "v1.0.4",
 	"developer": "nanew",
 	"description": "Track your playtime on levels!",
 	"dependencies": {
@@ -28,7 +28,14 @@
 			"type": "bool",
 			"name": "Remove pauses from Playtime",
 			"description": "<cg>If enabled</c>, removes the time you spend in the pause menu from your playtime. <cy>This also removes the time you spend at the 'Level Complete' screen<c/>",
-			"default":false
+			"default":true
+		},
+		"session-type":{
+			"type": "string",
+			"name": "Session end type",
+			"description": "Determines what is considered a session (inspired by death tracker)\n<cy>Exit Level</c> - Ends the session whenever you exit the level\n<cy>Exit Game</c> - Ends the session whenever you close the Game",
+			"one-of": ["Exit Level", "Exit Game"],
+			"default": "Exit Level"
 		},
 		"stop-completion":{
 			"type": "bool",

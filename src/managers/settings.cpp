@@ -38,3 +38,7 @@ std::string Settings::getCustomTimeFormat() {
 bool Settings::getDisableDeletionPopup() {
 	return Mod::get()->getSettingValue<bool>("disable-deletion-popup");
 }
+
+std::string Settings::getSessionType() {
+	return Mod::get()->getSettingValue<std::string>("session-type");
+}

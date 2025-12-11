@@ -43,4 +43,8 @@ public:
 	static void fixSessionAtIndex(std::string const& levelID, int index);
 
 	static int getTotalPlaytime(std::string const& levelID);
+
+	static bool isLevelPlayedSession(std::string const& levelID);
+
+	static void appendPlayedLevel(std::string const& levelID);
 };

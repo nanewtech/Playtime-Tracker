@@ -21,4 +21,6 @@ public:
 	static std::string getCustomTimeFormat();
 
 	static bool getDisableDeletionPopup();
+
+	static std::string getSessionType();
 };

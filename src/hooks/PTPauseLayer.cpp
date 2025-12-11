@@ -81,8 +81,8 @@ class $modify(PTPauseLayer, PauseLayer) {
 	} */
 
 	void onEdit(CCObject* sender) {
-		Mod::get()->setSavedValue<bool>("is-paused", false);
 		Data::exitLevel(m_fields->m_levelID);
+		Mod::get()->setSavedValue<bool>("is-paused", false);
 		PauseLayer::onEdit(sender);
 	}
 
