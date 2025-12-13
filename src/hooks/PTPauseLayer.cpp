@@ -18,7 +18,10 @@ class $modify(PTPauseLayer, PauseLayer) {
 
 		m_fields->m_levelID = Mod::get()->getSavedValue<std::string>("current-level-id");
 
-		time_t timestamp;
+		time_t timestamp = time(nullptr);
+
+
+		Mod::get()->setSavedValue<time_t>("pause-timestamp", timestamp);
 
 		Data::pauseLevel(m_fields->m_levelID);
 		auto sprite = CCSprite::create("playtimeButton.png"_spr);
@@ -91,5 +94,12 @@ class $modify(PTPauseLayer, PauseLayer) {
 			Mod::get()->setSavedValue<bool>("is-paused", false);
 
 			PauseLayer::onRestart(sender);
+	}
+
+	void onRestartFull(CCObject* sender) {
+		if (Mod::get()->getSavedValue<bool>("is-paused")) Data::resumeLevel(m_fields->m_levelID);
+		Mod::get()->setSavedValue<bool>("is-paused", false);
+
+		PauseLayer::onRestartFull(sender);
 	}
 };

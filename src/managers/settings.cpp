@@ -42,3 +42,11 @@ bool Settings::getDisableDeletionPopup() {
 std::string Settings::getSessionType() {
 	return Mod::get()->getSettingValue<std::string>("session-type");
 }
+
+bool Settings::getAFKEnable() {
+	return Mod::get()->getSettingValue<bool>("afk-enable");
+}
+
+int Settings::getAFKThreshold() {
+	return Mod::get()->getSettingValue<int64_t>("afk-threshold");
+}

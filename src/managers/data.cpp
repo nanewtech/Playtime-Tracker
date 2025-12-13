@@ -75,7 +75,7 @@ void Data::startLevel(std::string const& levelID) {
 }
 
 void Data::pauseLevel(std::string const& levelID) {
-    
+
     if (Settings::getStopOnCompletion() && Mod::get()->getSavedValue<int>("current-level-best") == 100) return; 
         
     if (!Settings::getRemovePauses()) return;
@@ -93,10 +93,10 @@ void Data::pauseLevel(std::string const& levelID) {
     Backup::createBackup(Data::getFile());
 }
 
-void Data::resumeLevel(std::string const& levelID) {
+void Data::resumeLevel(std::string const& levelID, bool removePauseOverride) {
     if (Settings::getStopOnCompletion() && Mod::get()->getSavedValue<int>("current-level-best") == 100) return;
-    
-    if (!Settings::getRemovePauses()) return;
+
+    if (!Settings::getRemovePauses() && !removePauseOverride) return;
     
     auto data = getFile();
     time_t timestamp;
@@ -389,4 +389,17 @@ bool Data::isLevelPlayedSession(std::string const& levelID) {
 
 void Data::appendPlayedLevel(std::string const& levelID) {
     playedIDs.insert(levelID);
+}
+
+void Data::appendPauseTimestamp(std::string const& levelID, time_t timestamp) {
+    if (Settings::getStopOnCompletion() && Mod::get()->getSavedValue<int>("current-level-best") == 100) return;
+
+    auto data = getFile();
+
+    auto& sessions = data[levelID]["sessions"];
+    auto& latestSession = sessions[sessions.size() - 1];
+
+    latestSession[latestSession.size() - 1].push(timestamp);
+
+    writeFile(data);
 }

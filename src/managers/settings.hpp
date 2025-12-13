@@ -23,4 +23,8 @@ public:
 	static bool getDisableDeletionPopup();
 
 	static std::string getSessionType();
+
+	static bool getAFKEnable();
+
+	static int getAFKThreshold();
 };

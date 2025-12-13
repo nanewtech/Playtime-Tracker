@@ -14,7 +14,7 @@ public:
 
 	static void pauseLevel(std::string const& levelID);
 
-	static void resumeLevel(std::string const& levelID);
+	static void resumeLevel(std::string const& levelID, bool removePauseOverride = false);
 
 	static void exitLevel(std::string const& levelID);
 
@@ -47,4 +47,6 @@ public:
 	static bool isLevelPlayedSession(std::string const& levelID);
 
 	static void appendPlayedLevel(std::string const& levelID);
+
+	static void appendPauseTimestamp(std::string const& levelID, time_t timestamp);
 };

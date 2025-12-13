@@ -8,7 +8,7 @@
 	},
 	"id": "nanew.playtime-tracker",
 	"name": "Playtime Tracker",
-	"version": "v1.0.4",
+	"version": "v1.0.5",
 	"developer": "nanew",
 	"description": "Track your playtime on levels!",
 	"dependencies": {
@@ -69,6 +69,37 @@
 			"description": "Disables the popup that shows up after deleting sessions.",
 			"default":false
 		},
+		"afk-title":{
+			"type": "title",
+			"name": "AFK timeout settings",
+			"description": "These settings decide if <cy>pauses will be removed anyway when youre afk</c> on the pause menu!"
+		},
+		"afk-enable":{
+			"type": "bool",
+			"name": "Remove pauses when AFK",
+			"description": "<cg>When enabled</c>, will allow Playtime Tracker to <cy>remove your pauses if you're considered AFK!</c>",
+			"enable-if": "!(remove-pauses)",
+			"enable-if-description": "Disable \"Remove pauses from Playtime\"",
+			"default":true
+		},
+		"afk-threshold":{
+			"type": "int",
+			"name": "Consider AFK after (seconds)",
+			"description": "This will determine how long you need to be paused to be considered AFK! <cy>Value is in seconds!</c>",
+			"default": 300,
+			"min": 30,
+			"max": 3600,
+			"enable-if": "!(remove-pauses)",
+			"enable-if-description": "Disable \"Remove pauses from Playtime\"",
+			"control": {
+				"arrows": true,
+				"arrow-step": 10,
+				"big-arrows": true,
+				"big-arrow-step": 60,
+				"slider": false,
+				"input": true
+			}
+		},	
 		"time-title":{
 			"type": "title",
 			"name": "Time format settings",
