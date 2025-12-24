@@ -22,10 +22,16 @@ class $modify(PTEditLevelLayer, EditLevelLayer) {
 		}
 
 		m_fields->m_level = level;
+		
+		auto buttonSprite = CCSprite::createWithSpriteFrameName("GJ_plainBtn_001.png");
+		auto clockSprite = CCSprite::create("clock.png"_spr);
+		clockSprite->setPosition(buttonSprite->getContentSize() / 2);
+		buttonSprite->addChild(clockSprite);
 
-		auto sprite = CCSprite::create("playtimeButton.png"_spr);
+		// auto sprite = CircleButtonSprite::createWithSprite("clock.png"_spr);
+		// auto sprite = CCSprite::create("playtimeButton.png"_spr);
 		auto playtimeButton = CCMenuItemSpriteExtra::create(
-			sprite,
+			buttonSprite,
 			this,
 			menu_selector(PTEditLevelLayer::onPlaytimeButton)
 		);
@@ -44,7 +50,7 @@ class $modify(PTEditLevelLayer, EditLevelLayer) {
 
 		if (Settings::getInfoLayerPosition() == "Bottom") {
 
-			sprite->setScale(0.75f);
+			buttonSprite->setScale(0.75f);
 
 			float x = 34.5f;
 			float y = infoButtonMenu->getChildByID("settings-button")->getPositionY();
@@ -55,7 +61,7 @@ class $modify(PTEditLevelLayer, EditLevelLayer) {
 			infoButtonMenu->updateLayout();
 		}
 		else {
-			sprite->setScale(0.8f);
+			buttonSprite->setScale(0.8f);
 
 			folderMenu->addChild(playtimeButton);
 			folderMenu->updateLayout();

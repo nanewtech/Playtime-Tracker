@@ -2,7 +2,7 @@
 Playtime Tracker is a simple mod that tracks your playtime while you're trying to beat levels! 
 
 ### Features include:
-- Tracking your total playtime on a level (mostly accurately)
+- Tracking your total playtime on all levels individually based on unix timestamps
 - Giving you stats about your playtime 
 - Tracking *when* and for *how long* you played (individual sessions)
 
@@ -16,3 +16,5 @@ If you happen to discover a bug or want to suggest a feature, feel free to [open
 [**Jimaras17**](https://x.com/jimaras17_) - For the button / logo art + testing
 
 **st** - For helping me playtest the mod and being awesome in general
+
+[**hiimjasmine00**](https://github.com/hiimjasmine00) - For helping with the code

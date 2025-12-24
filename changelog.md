@@ -1,8 +1,15 @@
+# v1.0.6
+- added option to move the button in the pause menu
+- added option to disable the button in the pause menu
+- made the buttons compatible with texture packs
+- updated about page
+- added homepage
+- fixed typos
 # v1.0.5
 - added customizable afk timeout when not removing pauses from playtime
-- fixed an issue where pressing the replay button in platformer mode wouldnt count playtime
-- fixed tracking when chosing options on level complete screen
-- fixed an issue where the session wouldnt continue if you had 'session end type' as 'exit game' and 'remove pauses from playtime' off
+- fixed an issue where pressing the replay button in platformer mode wouldn't count playtime
+- fixed tracking when choosing options on level complete screen
+- fixed an issue where the session wouldn't continue if you had 'session end type' as 'exit game' and 'remove pauses from playtime' off
 # v1.0.4
 - added an option to have the session end at game exit or level exit
 - made "remove pauses from playtime" on by default

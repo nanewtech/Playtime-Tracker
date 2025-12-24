@@ -4,6 +4,7 @@
 
 #include "../managers/data.hpp"
 #include "../layers/pausePopup.hpp"
+#include "../managers/settings.hpp"
 
 using namespace geode::prelude;
 
@@ -24,20 +25,34 @@ class $modify(PTPauseLayer, PauseLayer) {
 		Mod::get()->setSavedValue<time_t>("pause-timestamp", timestamp);
 
 		Data::pauseLevel(m_fields->m_levelID);
-		auto sprite = CCSprite::create("playtimeButton.png"_spr);
-		sprite->setScale(0.8f);
+		auto buttonSprite = CCSprite::createWithSpriteFrameName("GJ_plainBtn_001.png");
+		auto clockSprite = CCSprite::create("clock.png"_spr);
+		clockSprite->setPosition(buttonSprite->getContentSize() / 2);
+		buttonSprite->addChild(clockSprite);
+		// auto sprite = CCSprite::create("playtimeButton.png"_spr);
+		buttonSprite->setScale(0.8f);
+		if (Settings::getPauseLayerPosition() == "Right") buttonSprite->setScale(0.65f);
 
 		auto ptButton = CCMenuItemSpriteExtra::create(
-			sprite,
+			buttonSprite,
 			this,
 			menu_selector(PTPauseLayer::onPtButton)
 		);
 
-		auto menu = this->getChildByID("left-button-menu");
-		ptButton->setID("playtime-tracker-button");
-		menu->addChild(ptButton);
+		if (!Settings::getEnablePauseButton()) return;
 
-		menu->updateLayout();
+		auto leftMenu = this->getChildByID("left-button-menu");
+		auto rightMenu = this->getChildByID("right-button-menu");
+		ptButton->setID("playtime-tracker-button");
+
+		if (Settings::getPauseLayerPosition() == "Right") {
+			rightMenu->addChild(ptButton);
+			rightMenu->updateLayout();
+		}
+		else {
+			leftMenu->addChild(ptButton);
+			leftMenu->updateLayout();
+		}
 
 	} /*
 	void onQuit(CCObject * sender) {

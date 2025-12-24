@@ -8,7 +8,7 @@
 	},
 	"id": "nanew.playtime-tracker",
 	"name": "Playtime Tracker",
-	"version": "v1.0.5",
+	"version": "v1.0.6",
 	"developer": "nanew",
 	"description": "Track your playtime on levels!",
 	"dependencies": {
@@ -62,6 +62,21 @@
 			"description": "Decide if the button on the level info page should appear above the favorites or on the left side of the screen. <cr>CHOOSING BOTTOM CAN LEAD TO VISUAL ISSUES (OVERLAPPING BUTTONS)!</c>",
 			"one-of": ["Bottom", "Left"],
 			"default": "Left"
+		},
+		"enable-pause-button": {
+			"type": "bool",
+			"name": "Enable pause menu button",
+			"description": "Enables the button on the pause menu inside a level.",
+			"default": true
+		},
+		"pauseLayer-position":{
+			"type": "string",
+			"name": "Pause button position",
+			"description": "Decide if the pause menu button should appear on the left or right side.",
+			"one-of": ["Left", "Right"],
+			"default": "Left",
+			"enable-if": "enable-pause-button",
+			"enable-if-description": "Enable \"Enable pause menu button\""
 		},
 		"disable-deletion-popup":{
 			"type": "bool",
@@ -131,7 +146,8 @@
 	},
 	"links": {
 		"source": "https://github.com/nanewtech/Playtime-Tracker",
-		"community": "https://discord.gg/DxYp6pma3D"
+		"community": "https://discord.gg/DxYp6pma3D",
+		"homepage": "https://nanewtech.dev/"
 	},
 	"issues": {
 		"url": "https://github.com/nanewtech/Playtime-Tracker/issues",
@@ -139,7 +155,7 @@
 	"tags": ["offline", "utility"],
 	"resources": {
 		"sprites": [
-			"resources/playtimeButton.png"
+			"resources/clock.png"
 		]
 	}
 }

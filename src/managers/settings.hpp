@@ -27,4 +27,8 @@ public:
 	static bool getAFKEnable();
 
 	static int getAFKThreshold();
+
+	static std::string getPauseLayerPosition();
+
+	static bool getEnablePauseButton();
 };

@@ -50,3 +50,11 @@ bool Settings::getAFKEnable() {
 int Settings::getAFKThreshold() {
 	return Mod::get()->getSettingValue<int64_t>("afk-threshold");
 }
+
+std::string Settings::getPauseLayerPosition() {
+	return Mod::get()->getSettingValue<std::string>("pauseLayer-position");
+}
+
+bool Settings::getEnablePauseButton() {
+	return Mod::get()->getSettingValue<bool>("enable-pause-button");
+}
