@@ -15,6 +15,6 @@ If you happen to discover a bug or want to suggest a feature, feel free to [open
 
 [**Jimaras17**](https://x.com/jimaras17_) - For the button / logo art + testing
 
-**st** - For helping me playtest the mod and being awesome in general
-
 [**hiimjasmine00**](https://github.com/hiimjasmine00) - For helping with the code
+
+[**st**](https://x.com/stguestd) - For helping me playtest the mod and being awesome in general

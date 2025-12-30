@@ -14,7 +14,6 @@ using namespace geode::prelude;
 
 class $modify(PTLevelInfoLayer, LevelInfoLayer) {
 	struct Fields {
-		GJGameLevel* m_level;
 		std::string m_levelID;
 	};
 	
@@ -25,8 +24,6 @@ class $modify(PTLevelInfoLayer, LevelInfoLayer) {
 		if (!LevelInfoLayer::init(level, challenge)) {
 			return false;
 		}
-
-		m_fields->m_level = level;
 
 		auto buttonSprite = CCSprite::createWithSpriteFrameName("GJ_plainBtn_001.png");
 		auto clockSprite = CCSprite::create("clock.png"_spr);
@@ -101,7 +98,7 @@ class $modify(PTLevelInfoLayer, LevelInfoLayer) {
 		// btn->setScale(0.8f);
 		
 
-		MenuPopup::create(m_fields->m_level)->show();
+		MenuPopup::create(this->m_level)->show();
 
 		/*
 			FLAlertLayer::create(

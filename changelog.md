@@ -1,3 +1,6 @@
+# v1.0.7
+- fixed minor issue where geode would crash occasionally with large ammounts of mods enabled
+- adjusted listing of credits / special thanks
 # v1.0.6
 - added option to move the button in the pause menu
 - added option to disable the button in the pause menu
