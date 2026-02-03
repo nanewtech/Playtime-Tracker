@@ -21,7 +21,6 @@ class $modify(PTPauseLayer, PauseLayer) {
 
 		time_t timestamp = time(nullptr);
 
-
 		Mod::get()->setSavedValue<time_t>("pause-timestamp", timestamp);
 
 		Data::pauseLevel(m_fields->m_levelID);
@@ -100,6 +99,25 @@ class $modify(PTPauseLayer, PauseLayer) {
 
 	void onEdit(CCObject* sender) {
 		Data::exitLevel(m_fields->m_levelID);
+
+		if (Settings::getSessionType() == "Exit Game") {
+			if (Data::isLevelPlayedSession(m_fields->m_levelID)) {
+				Data::addSessionAttempts(m_fields->m_levelID, PlayLayer::get()->m_attempts);
+			}
+			else {
+				Data::appendAttempts(m_fields->m_levelID, PlayLayer::get()->m_attempts);
+			}
+		}
+		else {
+			Data::appendAttempts(m_fields->m_levelID, PlayLayer::get()->m_attempts);
+		}
+
+		if (Settings::getSessionType() == "Exit Game") {
+			if (!Data::isLevelPlayedSession(m_fields->m_levelID)) {
+				Data::appendPlayedLevel(m_fields->m_levelID);
+			}
+		}
+
 		Mod::get()->setSavedValue<bool>("is-paused", false);
 		PauseLayer::onEdit(sender);
 	}

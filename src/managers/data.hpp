@@ -26,21 +26,21 @@ public:
 
 	static std::string formattedPlaytime(int playtime);
 
-	static tm* getLastPlayedRaw(std::string const& levelID);
+	static tm getLastPlayedRaw(std::string const& levelID);
 
-	static tm* getPlayedRawAtIndex(std::string const& levelID, int index);
+	static tm getPlayedRawAtIndex(std::string const& levelID, int index);
 
 	static int getSessionPlaytimeRawAtIndex(std::string const& levelID, int index);
 
-	static std::string getPlayedFormatted(tm* localTimestamp);
+	static std::string getPlayedFormatted(tm const& localTimestamp);
 
 	static int getSessionCount(std::string const& levelID);
 
 	static void deleteLevelData(std::string const& levelID);
 
-	static void deleteSessionAtIndex(std::string const& levelID, int index);
+	static void deleteSessionAtIndex(std::string const& levelID, int const index);
 
-	static void fixSessionAtIndex(std::string const& levelID, int index);
+	static void fixSessionAtIndex(std::string const& levelID, int const index);
 
 	static int getTotalPlaytime(std::string const& levelID);
 
@@ -49,4 +49,10 @@ public:
 	static void appendPlayedLevel(std::string const& levelID);
 
 	static void appendPauseTimestamp(std::string const& levelID, time_t timestamp);
+
+	static void initAttemptsList(std::string const& levelID);
+
+	static void appendAttempts(std::string const& levelID, int newAttempts);
+
+	static void addSessionAttempts(std::string const& levelID, int newAttempts);
 };

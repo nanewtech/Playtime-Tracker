@@ -64,7 +64,10 @@ public:
 };
 
 
-bool MenuPopup::setup(GJGameLevel* level) {
+bool MenuPopup::init(GJGameLevel* level) {
+
+    if (!Popup::init(300.f, 275.f)) return false;
+
 	this->setTitle("Playtime Tracker");
     this->setID("Playtime-Tracker-Popup"_spr);
 
@@ -221,7 +224,7 @@ bool MenuPopup::setup(GJGameLevel* level) {
 MenuPopup* MenuPopup::create(GJGameLevel* level) {
     auto ret = new MenuPopup();
     ret->m_level = level;
-    if (ret->initAnchored(300.f, 275.f, level)) {
+    if (ret->init(level)) { // 300.f, 275.f
         ret->autorelease();
         return ret;
     }
@@ -233,7 +236,7 @@ CCMenu* MenuPopup::sessionMenuElement(std::string const& levelID, int index) {
     auto menu = CCMenu::create();
     menu->setContentSize({ 265.f, 25.f });
     menu->setTag(index);
-    auto sessionTitle = CCLabelBMFont::create(fmt::format("Session {} - {}", index + 1, Data::getPlayedFormatted(Data::getPlayedRawAtIndex(levelID, index))).c_str(), "bigFont.fnt");
+    auto sessionTitle = CCLabelBMFont::create(fmt::format("Session {} - {}", index + 1, Data::getPlayedFormatted(Data::getPlayedRawAtIndex(levelID, index) )).c_str(), "bigFont.fnt");
     auto sessionPlaytime = CCLabelBMFont::create("corrupted session, will disappear", "bigFont.fnt");
     if (Data::getSessionPlaytimeRawAtIndex(levelID, index) != -1) sessionPlaytime = CCLabelBMFont::create(Data::formattedPlaytime(Data::getSessionPlaytimeRawAtIndex(levelID, index)).c_str(), "bigFont.fnt");
 

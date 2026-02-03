@@ -140,9 +140,6 @@ int Data::getLatestSession(std::string const& levelID) {
     auto& sessions = data[levelID]["sessions"];
     auto& latestSession = sessions[sessions.size() - 1];
 
-    time_t timestamp;
-
-    int index = 0;
     for (auto& currPair : latestSession) {
         if (currPair.size() >= 2) {
             if (!currPair[0].isNumber() || !currPair[1].isNumber()) {
@@ -250,9 +247,9 @@ std::string Data::formattedPlaytime(int playtime) {
         return fmt::to_string(formatted);
 }
 
-tm* Data::getLastPlayedRaw(std::string const& levelID) {
+tm Data::getLastPlayedRaw(std::string const& levelID) {
     auto data = getFile();
-    time_t timestamp = time(0);
+    time_t timestamp = time(nullptr);
 
     auto& sessions = data[levelID]["sessions"];
     auto& latestSession = sessions[sessions.size() - 1];
@@ -262,22 +259,22 @@ tm* Data::getLastPlayedRaw(std::string const& levelID) {
         int sessionStart = latestPair[0].asInt().unwrap();
         timestamp = static_cast<time_t>(sessionStart);
     }
-    return localtime(&timestamp);
+    return geode::localtime(timestamp);
 }
 
-tm* Data::getPlayedRawAtIndex(std::string const& levelID, int index) {
+tm Data::getPlayedRawAtIndex(std::string const& levelID, int index) {
     auto data = getFile();
-    time_t timestamp = time(0);
+    time_t timestamp = time(nullptr);
     auto& sessionValue = data[levelID]["sessions"][index][0][0];
     if (sessionValue.isNumber()) {
         int sessionStart = data[levelID]["sessions"][index][0][0].asInt().unwrap();
         timestamp = static_cast<time_t>(sessionStart);
 
-        return localtime(&timestamp);
+        return geode::localtime(timestamp);
     }
     else {
         Data::deleteSessionAtIndex(levelID, index);
-        return localtime(&timestamp);
+        return geode::localtime(timestamp);
     }
 }
 
@@ -299,8 +296,7 @@ int Data::getSessionPlaytimeRawAtIndex(std::string const& levelID, int index) {
     return playtime;
 }
 
-std::string Data::getPlayedFormatted(tm* localTimestamp) {
-    
+std::string Data::getPlayedFormatted(tm const& localTimestamp) {
     auto timeformat = Settings::getCustomTimeFormat();
     if (!(Settings::getUseCustomTimeFormat())) {
         if (Settings::getTimeFormat() == "ISO") timeformat = "%F %T";
@@ -310,7 +306,7 @@ std::string Data::getPlayedFormatted(tm* localTimestamp) {
         
     char formatted[64];
 
-    strftime(formatted, sizeof(formatted), timeformat.c_str(), localTimestamp);
+    strftime(formatted, sizeof(formatted), timeformat.c_str(), &localTimestamp);
     return formatted;
 }
 
@@ -325,7 +321,7 @@ void Data::deleteLevelData(std::string const& levelID) {
     writeFile(data);
 }
 
-void Data::deleteSessionAtIndex(std::string const& levelID, int index) {
+void Data::deleteSessionAtIndex(std::string const& levelID, int const index) {
     auto data = getFile();
     auto& sessions = data[levelID]["sessions"];
 
@@ -346,7 +342,7 @@ void Data::deleteSessionAtIndex(std::string const& levelID, int index) {
     }
 }
 
-void Data::fixSessionAtIndex(std::string const& levelID, int index) {
+void Data::fixSessionAtIndex(std::string const& levelID, int const index) {
     auto data = getFile();
 
     auto newSession = matjson::Value::array();
@@ -402,4 +398,44 @@ void Data::appendPauseTimestamp(std::string const& levelID, time_t timestamp) {
     latestSession[latestSession.size() - 1].push(timestamp);
 
     writeFile(data);
+}
+
+void Data::initAttemptsList(std::string const& levelID) {
+    auto data = getFile();
+
+    auto& attempts = data[levelID]["attempts"];
+
+    if (attempts.isArray()) return;
+
+    attempts = matjson::Value::array();
+
+    writeFile(data);
+}
+
+void Data::appendAttempts(std::string const& levelID, int newAttempts) {
+    auto data = getFile();
+    auto& attempts = data[levelID]["attempts"];
+
+
+    attempts.push(newAttempts);
+
+    writeFile(data);
+}
+
+void Data::addSessionAttempts(std::string const& levelID, int newAttempts) {
+    auto data = getFile();
+    auto& attempts = data[levelID]["attempts"];
+    auto& latestAttempts = attempts[attempts.size() - 1];
+
+    if (!latestAttempts.isExactlyUInt()) return;
+
+
+    int count = latestAttempts.asInt().unwrap();
+
+    latestAttempts = count + newAttempts;
+    writeFile(data);
+
+    // return;
+
+    // if (Settings::getSessionType() == "Exit Game" && Data::isLevelPlayedSession(levelID)) { }
 }

@@ -6,7 +6,10 @@
 
 using namespace geode::prelude;
 
-bool PausePopup::setup(std::string const& levelID) {
+bool PausePopup::init(std::string const& levelID) {
+
+    if (!Popup::init(240.f, 160.f)) return false;
+
     this->setID("Playtime-Tracker-Popup"_spr);
     this->setTitle("Playtime Tracker");
 
@@ -25,7 +28,7 @@ bool PausePopup::setup(std::string const& levelID) {
     totalTitle->setScale(0.75f);
 
 
-    auto totalPlaytime = Data::getPlaytimeRaw(levelID);
+    // auto totalPlaytime = Data::getPlaytimeRaw(levelID);
     auto totalLabel = CCLabelBMFont::create(Data::formattedPlaytime(Data::getTotalPlaytime(levelID)).c_str(), "bigFont.fnt");
     auto playtime = Data::getSessionPlaytimeRaw(levelID);
     auto playtimeLabel = CCLabelBMFont::create(Data::formattedPlaytime(playtime).c_str() , "bigFont.fnt");
@@ -62,7 +65,7 @@ bool PausePopup::setup(std::string const& levelID) {
 
 PausePopup* PausePopup::create(std::string const& levelID) {
     auto ret = new PausePopup();
-    if (ret->initAnchored(240.f, 160.f, levelID)) {
+    if (ret->init(levelID)) {
         ret->autorelease();
         return ret;
     }

@@ -33,14 +33,13 @@ class $modify(PTPlayLayer, PlayLayer) {
 
 		if (Settings::getSessionType() == "Exit Game") {
 			if (Data::isLevelPlayedSession(m_fields->m_levelID)) {
+				
 				Data::resumeLevel(m_fields->m_levelID, true);
 				return true;
 			}
-			else {
-				Data::appendPlayedLevel(m_fields->m_levelID);
-			}
 		}
 
+		Data::initAttemptsList(m_fields->m_levelID);
 		Data::startLevel(m_fields->m_levelID);
 		return true;
 	}
@@ -63,7 +62,7 @@ class $modify(PTPlayLayer, PlayLayer) {
 	void levelComplete() {
 		Mod::get()->setSavedValue<bool>("is-paused", true);
 		
-		Data::pauseLevel(m_fields -> m_levelID);
+		Data::pauseLevel(m_fields->m_levelID);
 
 		PlayLayer::levelComplete();
 	}
@@ -71,7 +70,21 @@ class $modify(PTPlayLayer, PlayLayer) {
 	void onQuit() {
 		Data::exitLevel(m_fields->m_levelID);
 
-		time_t timestamp;
+		if (Settings::getSessionType() == "Exit Game") {
+			if (Data::isLevelPlayedSession(m_fields->m_levelID)) {
+				Data::addSessionAttempts(m_fields->m_levelID, this->m_attempts);
+			} else {
+				Data::appendAttempts(m_fields->m_levelID, this->m_attempts);
+			}
+		} else {
+			Data::appendAttempts(m_fields->m_levelID, this->m_attempts);
+		}
+
+		if (Settings::getSessionType() == "Exit Game") {
+			if (!Data::isLevelPlayedSession(m_fields->m_levelID)) {
+				Data::appendPlayedLevel(m_fields->m_levelID);
+			}
+		}
 
 		Mod::get()->setSavedValue<bool>("is-paused", false);
 		PlayLayer::onQuit();

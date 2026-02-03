@@ -3,9 +3,9 @@
 #include <Geode/Geode.hpp>
 #include <string>
 
-class PausePopup : public geode::Popup<std::string const&> {
+class PausePopup : public geode::Popup {
 protected:
-	bool setup(std::string const& levelID) override;
+	bool init(std::string const& levelID);
 public:
 	static PausePopup* create(std::string const& levelID);
 };

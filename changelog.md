@@ -1,5 +1,11 @@
+# v1.1.0
+- Ported to 2.2081 
+- added attempt count per session
+- added display for attempt count in popup
+- added button to override levels attempts with mods counted attempts
+- fixed minor bugs and typos
 # v1.0.7
-- fixed minor issue where geode would crash occasionally with large ammounts of mods enabled
+- fixed minor issue where geode would crash occasionally with large amounts of mods enabled
 - adjusted listing of credits / special thanks
 # v1.0.6
 - added option to move the button in the pause menu
