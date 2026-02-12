@@ -55,4 +55,10 @@ public:
 	static void appendAttempts(std::string const& levelID, int newAttempts);
 
 	static void addSessionAttempts(std::string const& levelID, int newAttempts);
+
+	static int getLevelAttempts(std::string const& levelID);
+
+	static int getSessionAttemptsAtIndex(std::string const& levelID, int index);
+
+	static int getAttemptSessionCount(std::string const& levelID);
 };

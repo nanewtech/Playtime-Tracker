@@ -63,6 +63,31 @@ public:
     }
 };
 
+class OpenAttempts : public CCLayer {
+public:
+    void open(CCObject* sender) {
+
+        auto obj = static_cast<CCNode*>(sender)->getUserObject("level-id");
+        std::string levelID = static_cast<CCString*>(obj)->getCString();
+
+        auto levelObj = static_cast<CCNode*>(sender)->getUserData();
+        auto level = static_cast<GJGameLevel*>(levelObj);
+
+        int gameAttempts = level->m_attempts.value();
+        int modAttempts = Data::getLevelAttempts(levelID);
+
+        geode::createQuickPopup(
+            "Overwrite Attempts",
+            fmt::format("Are you SURE you want to <cy>overwrite the game's {} tracked Attemps</c> with the <cy>mods {} tracked Attempts?</c> (<cr>This action is IRREVERSIBLE!</c>)", gameAttempts, modAttempts),
+            "Don't overwrite", "Overwrite Attempts",
+            [level, modAttempts](auto, bool btn2) {
+                if (btn2) {
+                    level->setAttempts(modAttempts);
+                }
+            }
+            );
+    }
+};
 
 bool MenuPopup::init(GJGameLevel* level) {
 
@@ -89,9 +114,9 @@ bool MenuPopup::init(GJGameLevel* level) {
     auto sessionValue = CCLabelBMFont::create(Data::formattedPlaytime(Data::getLatestSession(levelID)).c_str(), "bigFont.fnt");
 
     totalTitle->setScale(0.75f);
-    totalValue->setScale(0.35f);
+    totalValue->limitLabelWidth(300.f, .35f, .1f);
     sessionTitle->setScale(0.75f);
-    sessionValue->setScale(0.35f);
+    sessionValue->limitLabelWidth(300.f, .35f, .1f);
 
     // the scroll thing
     auto scrollLayer = geode::ScrollLayer::create({ 10.f,10.f,265.f,196.f});
@@ -145,9 +170,10 @@ bool MenuPopup::init(GJGameLevel* level) {
     auto timeSessionsLabel = CCLabelBMFont::create(fmt::format("Time/Session: {}", timeSessionsStat).c_str(), "bigFont.fnt");
 
     statsLabel->setScale(0.75f);
-    lastPlayedLabel->setScale(0.35f);
-    timeAttemptLabel->setScale(0.3f);
-    timeSessionsLabel->setScale(0.3f);
+
+    lastPlayedLabel->limitLabelWidth(650.f, .35f, .1f);
+    timeAttemptLabel->limitLabelWidth(650.f, .3f, .1f);
+    timeSessionsLabel->limitLabelWidth(650.f, .3f, .1f);
 
     content->addChild(statsLabel);
     content->addChild(lastPlayedLabel);
@@ -168,7 +194,7 @@ bool MenuPopup::init(GJGameLevel* level) {
 
     
     
-    content->setContentSize({ 265.f, 180.f + 30.f * (Data::getSessionCount(levelID)) });
+    content->setContentSize({ 265.f, 180.f + 45.f * (Data::getSessionCount(levelID)) });
 
     if (content->getContentHeight() < 196.f) content->setContentSize({ 265.f, 196.f});
 
@@ -207,11 +233,30 @@ bool MenuPopup::init(GJGameLevel* level) {
         menu_selector(OpenSettings::open)
     );
 
-
-
     settingsButton->setPosition({300.f, 272.f});
 
     extrabuttons->addChild(settingsButton);
+
+
+    auto attemptsSpr = CCSprite::createWithSpriteFrameName("GJ_updateBtn_001.png");
+
+    attemptsSpr->setScale(0.67f);
+
+    auto attemptsButton = CCMenuItemSpriteExtra::create(
+        attemptsSpr,
+        this,
+        menu_selector(OpenAttempts::open)
+    );
+
+
+    attemptsButton->setUserObject("level-id", CCString::create(levelID));
+    (void) attemptsButton->setUserData(level);
+
+    attemptsButton->setPosition({3.f, 0.f});
+
+    extrabuttons->addChild(attemptsButton);
+
+
 
 
 
@@ -234,13 +279,24 @@ MenuPopup* MenuPopup::create(GJGameLevel* level) {
 
 CCMenu* MenuPopup::sessionMenuElement(std::string const& levelID, int index) {
     auto menu = CCMenu::create();
-    menu->setContentSize({ 265.f, 25.f });
+    menu->setContentSize({ 265.f, 40.f });
     menu->setTag(index);
     auto sessionTitle = CCLabelBMFont::create(fmt::format("Session {} - {}", index + 1, Data::getPlayedFormatted(Data::getPlayedRawAtIndex(levelID, index) )).c_str(), "bigFont.fnt");
     auto sessionPlaytime = CCLabelBMFont::create("corrupted session, will disappear", "bigFont.fnt");
     if (Data::getSessionPlaytimeRawAtIndex(levelID, index) != -1) sessionPlaytime = CCLabelBMFont::create(Data::formattedPlaytime(Data::getSessionPlaytimeRawAtIndex(levelID, index)).c_str(), "bigFont.fnt");
 
+
+    // value to offset index in case attempt sessions count is less than time session count (if you played a level before this update)
+    int offset = Data::getAttemptSessionCount(levelID) - Data::getSessionCount(levelID);
+
+    auto sessionAttempts = CCLabelBMFont::create(fmt::format("{} Attempts", Data::getSessionAttemptsAtIndex(levelID, offset + index)).c_str(), "bigFont.fnt");
+
+    if (Data::getSessionAttemptsAtIndex(levelID, offset + index) == 1) sessionAttempts->setCString("1 Attempt");
+
+    if (Data::getSessionAttemptsAtIndex(levelID, offset + index) < 1) sessionAttempts->setCString("Untracked Attempts");
+
     auto deleteSprite = CCSprite::createWithSpriteFrameName("GJ_trashBtn_001.png");
+
     deleteSprite->setScale(0.55f);
 
     auto deleteSessionButton = CCMenuItemSpriteExtra::create(
@@ -251,18 +307,27 @@ CCMenu* MenuPopup::sessionMenuElement(std::string const& levelID, int index) {
 
     deleteSessionButton->setTag(index);
     deleteSessionButton->setUserObject("level-id", CCString::create(levelID));
-    deleteSessionButton->setPosition({ 240.f, 12.5f });
 
-    sessionTitle->setPosition({ 0.f,25.f });
-    sessionTitle->setScale(0.35f);
+    sessionTitle->setPosition({ 0.f,40.f });
+    sessionTitle->limitLabelWidth(600.f, .35f, .1f);
     sessionTitle->setAnchorPoint({ 0.f,1.f });
 
-    sessionPlaytime->setScale(0.35f);
+    sessionPlaytime->setPosition({ 10.f,15.f });
+    sessionPlaytime->limitLabelWidth(600.f, .35f, .1f);
     sessionPlaytime->setAnchorPoint({ 0.f,0.f });
+    sessionPlaytime->setColor({200, 200, 200});
 
+    sessionAttempts->setPosition({ 10.f,0.f });
+    sessionAttempts->limitLabelWidth(600.f, .35f, .1f);
+    sessionAttempts->setAnchorPoint({0.f, 0.f});
+    sessionAttempts->setColor({200, 200, 200});
+
+    deleteSessionButton->setPosition({ 240.f, 20.f });
     if (Data::getSessionCount(levelID) > 1) menu->addChild(deleteSessionButton);
+
     menu->addChild(sessionTitle);
     menu->addChild(sessionPlaytime);
+    menu->addChild(sessionAttempts);
 
     return menu;
 }

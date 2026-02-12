@@ -439,3 +439,33 @@ void Data::addSessionAttempts(std::string const& levelID, int newAttempts) {
 
     // if (Settings::getSessionType() == "Exit Game" && Data::isLevelPlayedSession(levelID)) { }
 }
+
+int Data::getLevelAttempts(std::string const& levelID) {
+    auto data = getFile();
+    auto& attempts = data[levelID]["attempts"];
+
+    int sum = 0;
+
+    for (auto& currAttempt : attempts) {
+        if (currAttempt.isNumber()) sum += currAttempt.asInt().unwrap();
+    }
+
+    return sum;
+}
+
+int Data::getSessionAttemptsAtIndex(std::string const& levelID, int index) {
+    auto data = getFile();
+    auto& attempts = data[levelID]["attempts"];
+    if (index < 0) return -1;
+
+    if (index < attempts.size()) return attempts[index].asInt().unwrap();
+
+    return -1;
+}
+
+int Data::getAttemptSessionCount(std::string const& levelID) {
+    auto data = getFile();
+    auto& attempts = data[levelID]["attempts"];
+
+    return attempts.size();
+}
