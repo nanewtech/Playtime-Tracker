@@ -78,7 +78,7 @@ public:
 
         geode::createQuickPopup(
             "Overwrite Attempts",
-            fmt::format("Are you SURE you want to <cy>overwrite the game's {} tracked Attemps</c> with the <cy>mods {} tracked Attempts?</c> (<cr>This action is IRREVERSIBLE!</c>)", gameAttempts, modAttempts),
+            fmt::format("Are you SURE you want to <cr>overwrite</c> the game's <cy>{} tracked Attempts</c> with <cr>the mods</c> <cj>{} tracked Attempts?</c> (<cr>This action is IRREVERSIBLE!</c>)", gameAttempts, modAttempts),
             "Don't overwrite", "Overwrite Attempts",
             [level, modAttempts](auto, bool btn2) {
                 if (btn2) {
@@ -286,7 +286,7 @@ CCMenu* MenuPopup::sessionMenuElement(std::string const& levelID, int index) {
     if (Data::getSessionPlaytimeRawAtIndex(levelID, index) != -1) sessionPlaytime = CCLabelBMFont::create(Data::formattedPlaytime(Data::getSessionPlaytimeRawAtIndex(levelID, index)).c_str(), "bigFont.fnt");
 
 
-    // value to offset index in case attempt sessions count is less than time session count (if you played a level before this update)
+    // value to offset index in case attempt sessions count is less than time session count (if you played a level update v1.1.0)
     int offset = Data::getAttemptSessionCount(levelID) - Data::getSessionCount(levelID);
 
     auto sessionAttempts = CCLabelBMFont::create(fmt::format("{} Attempts", Data::getSessionAttemptsAtIndex(levelID, offset + index)).c_str(), "bigFont.fnt");
