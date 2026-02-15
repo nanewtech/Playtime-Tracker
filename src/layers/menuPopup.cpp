@@ -24,7 +24,7 @@ public:
         std::string levelID = static_cast<CCString*>(obj)->getCString();
         geode::createQuickPopup(
             "Delete level data",
-            "Are you SURE you want to <cr>delete ALL data</c> on this level? (<cr>ALL your sessions will be deleted! This action is IRREVERSIBLE</c>)",
+            "Are you sure you want to <cr>delete ALL data</c> on this level? (<cr>ALL your sessions will be deleted! This action is IRREVERSIBLE</c>)",
             "Don't delete", "Delete everything",
             [levelID](auto, bool btn2) {
                 if (btn2) {
@@ -47,7 +47,7 @@ public:
         std::string levelID = static_cast<CCString*>(obj)->getCString();
         geode::createQuickPopup(
             "Delete session",
-            fmt::format("Are you SURE you want to <cr>delete session {}</c> on this level? (<cr>This action is IRREVERSIBLE!</c>)", index + 1),
+            fmt::format("Are you sure you want to <cr>delete session {}</c> on this level? (<cr>This action is IRREVERSIBLE!</c>)", index + 1),
             "Don't delete", "Delete session",
             [levelID, index](auto, bool btn2) {
                 if (btn2) {
@@ -77,9 +77,9 @@ public:
         int modAttempts = Data::getLevelAttempts(levelID);
 
         geode::createQuickPopup(
-            "Overwrite Attempts",
-            fmt::format("Are you SURE you want to <cr>overwrite</c> the game's <cy>{} tracked Attempts</c> with <cr>the mods</c> <cj>{} tracked Attempts?</c> (<cr>This action is IRREVERSIBLE!</c>)", gameAttempts, modAttempts),
-            "Don't overwrite", "Overwrite Attempts",
+            "Overwrite attempt count",
+            fmt::format("Are you sure you want to overwrite the game's \n<cy>{} tracked attempts</c> with the mods <cy>{} tracked attempts?</c> (<cr>This action is IRREVERSIBLE!</c>)", gameAttempts, modAttempts),
+            "Don't overwrite", "Overwrite attempts",
             [level, modAttempts](auto, bool btn2) {
                 if (btn2) {
                     level->setAttempts(modAttempts);

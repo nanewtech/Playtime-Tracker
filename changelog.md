@@ -1,8 +1,9 @@
 # v1.1.0
 - Ported to 2.2081 
 - added attempt count per session
-- added display for attempt count in popup
-- added button to override levels attempts with mods counted attempts
+- added display for attempt count per session in the menu popup
+- indented session attempts and playtime in popup for better visibility
+- added button to overwrite a levels attempts with the mods counted attempts
 - fixed minor bugs and typos
 # v1.0.7
 - fixed minor issue where geode would crash occasionally with large amounts of mods enabled
