@@ -1,4 +1,6 @@
+#include <arc/time/Sleep.hpp>
 #include <Geode/Geode.hpp>
+#include <Geode/utils/async.hpp>
 
 using namespace geode::prelude;
 

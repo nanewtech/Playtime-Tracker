@@ -1,4 +1,4 @@
-#include "./backup.hpp"
+#include "backup.hpp"
 
 using namespace geode::prelude;
 

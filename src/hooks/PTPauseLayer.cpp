@@ -98,7 +98,13 @@ class $modify(PTPauseLayer, PauseLayer) {
 	} */
 
 	void onEdit(CCObject* sender) {
-		Data::exitLevel(m_fields->m_levelID);
+
+		auto pauseTimestamp = Mod::get()->getSavedValue<time_t>("pause-timestamp");
+		time_t currTimestamp = time(nullptr);
+
+		if (std::difftime(currTimestamp, pauseTimestamp) >= Settings::getAFKThreshold() && Settings::getAFKEnable() && !Settings::getRemovePauses()) {
+			Data::appendPauseTimestamp(m_fields->m_levelID, pauseTimestamp);
+		} else 	Data::exitLevel(m_fields->m_levelID);
 
 		if (Settings::getSessionType() == "Exit Game") {
 			if (Data::isLevelPlayedSession(m_fields->m_levelID)) {
@@ -123,14 +129,33 @@ class $modify(PTPauseLayer, PauseLayer) {
 	}
 
 	void onRestart(CCObject* sender) {
-			if (Mod::get()->getSavedValue<bool>("is-paused")) Data::resumeLevel(m_fields->m_levelID);
+			if (Mod::get()->getSavedValue<bool>("is-paused")) {
+				Data::resumeLevel(m_fields->m_levelID);
+				auto pauseTimestamp = Mod::get()->getSavedValue<time_t>("pause-timestamp");
+				time_t currTimestamp = time(nullptr);
+
+				if (std::difftime(currTimestamp, pauseTimestamp) >= Settings::getAFKThreshold() && Settings::getAFKEnable() && !Settings::getRemovePauses()) {
+					Data::appendPauseTimestamp(m_fields->m_levelID, pauseTimestamp);
+					Data::resumeLevel(m_fields->m_levelID, true);
+				}
+			}
 			Mod::get()->setSavedValue<bool>("is-paused", false);
 
 			PauseLayer::onRestart(sender);
 	}
 
 	void onRestartFull(CCObject* sender) {
-		if (Mod::get()->getSavedValue<bool>("is-paused")) Data::resumeLevel(m_fields->m_levelID);
+		if (Mod::get()->getSavedValue<bool>("is-paused")) {
+			Data::resumeLevel(m_fields->m_levelID);
+
+			auto pauseTimestamp = Mod::get()->getSavedValue<time_t>("pause-timestamp");
+			time_t currTimestamp = time(nullptr);
+
+			if (std::difftime(currTimestamp, pauseTimestamp) >= Settings::getAFKThreshold() && Settings::getAFKEnable() && !Settings::getRemovePauses()) {
+				Data::appendPauseTimestamp(m_fields->m_levelID, pauseTimestamp);
+				Data::resumeLevel(m_fields->m_levelID, true);
+			}
+		}
 		Mod::get()->setSavedValue<bool>("is-paused", false);
 
 		PauseLayer::onRestartFull(sender);

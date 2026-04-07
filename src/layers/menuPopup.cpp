@@ -1,4 +1,4 @@
-#include "./menuPopup.hpp"
+#include "menuPopup.hpp"
 #include <Geode/Geode.hpp>
 #include <Geode/ui/ScrollLayer.hpp>
 #include <Geode/ui/GeodeUI.hpp>

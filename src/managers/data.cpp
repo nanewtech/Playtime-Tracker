@@ -1,6 +1,6 @@
-#include "./data.hpp"
-#include "./settings.hpp"
-#include "./backup.hpp"
+#include "data.hpp"
+#include "settings.hpp"
+#include "backup.hpp"
 
 
 using namespace geode::prelude;
@@ -17,6 +17,7 @@ bool Data::fileExists() {
 
 void writeFile(matjson::Value const& data) {
     std::string output = data.dump(matjson::NO_INDENTATION); //lowkey just no indentation cause it makes editing the file harder = less "cheating" :skull: @mizuki :eyes: :eyes:
+    // std::string output = data.dump();
     (void)file::writeString(getDataDirPath(), output);
 }
 

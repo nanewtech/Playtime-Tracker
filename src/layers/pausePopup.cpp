@@ -1,4 +1,4 @@
-#include "./pausePopup.hpp"
+#include "pausePopup.hpp"
 #include <Geode/ui/GeodeUI.hpp>
 #include <cvolton.level-id-api/include/EditorIDs.hpp>
 

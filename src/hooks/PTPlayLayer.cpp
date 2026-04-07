@@ -45,6 +45,7 @@ class $modify(PTPlayLayer, PlayLayer) {
 	}
 
 	void resume() {
+
 		Data::resumeLevel(m_fields->m_levelID);
 
 		auto pauseTimestamp = Mod::get()->getSavedValue<time_t>("pause-timestamp");
@@ -68,7 +69,12 @@ class $modify(PTPlayLayer, PlayLayer) {
 	}
 
 	void onQuit() {
-		Data::exitLevel(m_fields->m_levelID);
+		auto pauseTimestamp = Mod::get()->getSavedValue<time_t>("pause-timestamp");
+		time_t currTimestamp = time(nullptr);
+
+		if (std::difftime(currTimestamp, pauseTimestamp) >= Settings::getAFKThreshold() && Settings::getAFKEnable() && !Settings::getRemovePauses()) {
+			Data::appendPauseTimestamp(m_fields->m_levelID, pauseTimestamp);
+		} else 	Data::exitLevel(m_fields->m_levelID);
 
 		if (Settings::getSessionType() == "Exit Game") {
 			if (Data::isLevelPlayedSession(m_fields->m_levelID)) {
