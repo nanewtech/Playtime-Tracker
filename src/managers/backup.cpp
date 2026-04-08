@@ -2,36 +2,36 @@
 
 using namespace geode::prelude;
 
-static std::filesystem::path getBackupDirPath() {
-	return Mod::get()->getSaveDir() / "leveldata.backup";
+static std::filesystem::path getBackupDirPath(std::string const& levelID) {
+	return Mod::get()->getSaveDir() / "data" / (levelID + ".backup");
 }
 
 
-bool Backup::fileExists() {
-	return std::filesystem::exists(getBackupDirPath());
+bool Backup::fileExists(std::string const& levelID) {
+	return std::filesystem::exists(getBackupDirPath(levelID));
 }
 
-matjson::Value Backup::getFile() {
-	if (Backup::fileExists()) {
-		return file::readJson(getBackupDirPath()).unwrapOrDefault();
+matjson::Value Backup::getFile(std::string const& levelID) {
+	if (Backup::fileExists(levelID)) {
+		return file::readJson(getBackupDirPath(levelID)).unwrapOrDefault();
 	}
 	matjson::Value data;
-	Backup::createBackup(data);
+	Backup::createBackup(data, levelID);
 	return data;
 }
 
-void Backup::writeFile(matjson::Value const& data) {
+void Backup::writeFile(matjson::Value const& data, std::string const& levelID) {
 	std::string output = data.dump(matjson::NO_INDENTATION);
-	(void)file::writeString(getBackupDirPath(), output);
+	(void)file::writeString(getBackupDirPath(levelID), output);
 }
 
-void Backup::createBackup(matjson::Value const& data) {
-	log::info("Creating backup of leveldata.json");
-	Backup::writeFile(data);
+void Backup::createBackup(matjson::Value const& data, std::string const& levelID) {
+	log::info("Creating backup of {}.json", levelID);
+	Backup::writeFile(data, levelID);
 }
 
-void Backup::loadBackup() {
-	auto data = Backup::getFile();
+void Backup::loadBackup(std::string const& levelID) {
+	auto data = Backup::getFile(levelID);
 	std::string output = data.dump(matjson::NO_INDENTATION);
-	(void)file::writeString(Mod::get()->getSaveDir() / "leveldata.json", output);
+	(void)file::writeString(Mod::get()->getSaveDir() / "data" / (levelID + ".json"), output);
 }

@@ -7,57 +7,63 @@ using namespace geode::prelude;
 
 std::unordered_set<std::string> playedIDs;
 
-std::filesystem::path getDataDirPath() {
-    return Mod::get()->getSaveDir() / "leveldata.json";
+std::filesystem::path getDataDirPath(std::string const& levelID) {
+    return Mod::get()->getSaveDir() / "data" / (levelID + ".json");
 }
 
-bool Data::fileExists() {
-    return std::filesystem::exists(getDataDirPath());
+bool Data::fileExists(std::string const& levelID) {
+    return std::filesystem::exists(getDataDirPath(levelID));
 }
 
-void writeFile(matjson::Value const& data) {
+void writeFile(matjson::Value const& data, std::string const& levelID) {
     std::string output = data.dump(matjson::NO_INDENTATION); //lowkey just no indentation cause it makes editing the file harder = less "cheating" :skull: @mizuki :eyes: :eyes:
     // std::string output = data.dump();
-    (void)file::writeString(getDataDirPath(), output);
+    (void)file::writeString(getDataDirPath(levelID), output);
 }
 
-static void initializeFile() {
+static void initializeFile(std::string const& levelID) {
     matjson::Value data;
+    data["version"] = 2;
+    data["linked"] = matjson::Value::array();
+    data["sessions"] = matjson::Value::array();
 
-    writeFile(data);
+    writeFile(data, levelID);
 }
 
-matjson::Value Data::getFile() {
-    if (Data::fileExists()) {
-        if (auto data = file::readJson(getDataDirPath())) {
+matjson::Value Data::getFile(std::string const& levelID) {
+    if (Data::fileExists(levelID)) {
+        if (auto data = file::readJson(getDataDirPath(levelID))) {
             return data.unwrap();
         }
         else {
-            log::info("Leveldata.json broken, Loading backup!");
-            Backup::loadBackup();
+            log::info("{}.json broken, Loading backup!", levelID);
+            Backup::loadBackup(levelID);
         }
     }
-    if (Backup::fileExists()) {
-        log::info("Leveldata.json doesn't exist, Loading backup!");
-        Backup::loadBackup();
-        return Backup::getFile();
+    if (Backup::fileExists(levelID)) {
+        log::info("{}.json doesn't exist, Loading backup!", levelID);
+        Backup::loadBackup(levelID);
+        return Backup::getFile(levelID);
     }
-        log::info("backup doesn't exist, Creating empty leveldata.json!");
-        initializeFile();
+        log::info("backup doesn't exist, Creating empty {}.json!", levelID);
+        initializeFile(levelID);
         matjson::Value data;
+        data["version"] = 2;
+        data["linked"] = matjson::Value::array();
+        data["sessions"] = matjson::Value::array();
         return data;
 }
 
 static bool sessionsInitialized(std::string const& levelID) {
-    auto data = Data::getFile();
-    return !data[levelID].isNull();
+    auto data = Data::getFile(levelID);
+    return !data["sessions"].isNull();
 }
 
 void Data::startLevel(std::string const& levelID) {
-    auto data = getFile();
+    auto data = getFile(levelID);
     time_t timestamp;
 
-    auto& sessions = data[levelID]["sessions"];
+    auto& sessions = data["sessions"];
     
 
     if (Settings::getStopOnCompletion() && Mod::get()->getSavedValue<int>("current-level-best") == 100) return;
@@ -72,7 +78,7 @@ void Data::startLevel(std::string const& levelID) {
 
     latestSession[latestSession.size() - 1].push(time(&timestamp));
 
-    writeFile(data);
+    writeFile(data, levelID);
 }
 
 void Data::pauseLevel(std::string const& levelID) {
@@ -81,17 +87,17 @@ void Data::pauseLevel(std::string const& levelID) {
         
     if (!Settings::getRemovePauses()) return;
         
-    auto data = getFile();
+    auto data = getFile(levelID);
     time_t timestamp;
 
-    auto& sessions = data[levelID]["sessions"];
+    auto& sessions = data["sessions"];
     auto& latestSession = sessions[sessions.size() - 1];
 
 
     latestSession[latestSession.size() - 1].push(time(&timestamp));
 
-    writeFile(data);
-    Backup::createBackup(Data::getFile());
+    writeFile(data, levelID);
+    Backup::createBackup(Data::getFile(levelID), levelID);
 }
 
 void Data::resumeLevel(std::string const& levelID, bool removePauseOverride) {
@@ -99,10 +105,10 @@ void Data::resumeLevel(std::string const& levelID, bool removePauseOverride) {
 
     if (!Settings::getRemovePauses() && !removePauseOverride) return;
     
-    auto data = getFile();
+    auto data = getFile(levelID);
     time_t timestamp;
 
-    auto& sessions = data[levelID]["sessions"];
+    auto& sessions = data["sessions"];
     auto& latestSession = sessions[sessions.size() - 1];
 
     if (sessions.size() <= 0) {
@@ -113,38 +119,38 @@ void Data::resumeLevel(std::string const& levelID, bool removePauseOverride) {
     latestSession.push(matjson::Value::array());
     latestSession[latestSession.size() - 1].push(time(&timestamp));
 
-    writeFile(data);
+    writeFile(data, levelID);
 }
 
 void Data::exitLevel(std::string const& levelID) {
     if (Settings::getStopOnCompletion() && Mod::get()->getSavedValue<int>("current-level-best") == 100) return;
 
     if (!(Settings::getRemovePauses()) || (Mod::get()->getSavedValue<bool>("is-paused") && !(Settings::getRemovePauses())) || (!(Mod::get()->getSavedValue<bool>("is-paused")) && Settings::getRemovePauses())) {
-        auto data = getFile();
+        auto data = getFile(levelID);
         time_t timestamp;
 
-        auto& sessions = data[levelID]["sessions"];
+        auto& sessions = data["sessions"];
         auto& latestSession = sessions[sessions.size() - 1];
 
         latestSession[latestSession.size() - 1].push(time(&timestamp));
 
-        writeFile(data);
-        Backup::createBackup(Data::getFile());
+        writeFile(data, levelID);
+        Backup::createBackup(Data::getFile(levelID), levelID);
         }
     }
 
 int Data::getLatestSession(std::string const& levelID) {
-    auto data = getFile();
+    auto data = getFile(levelID);
 
     int playtime = 0;
 
-    auto& sessions = data[levelID]["sessions"];
+    auto& sessions = data["sessions"];
     auto& latestSession = sessions[sessions.size() - 1];
 
     for (auto& currPair : latestSession) {
         if (currPair.size() >= 2) {
             if (!currPair[0].isNumber() || !currPair[1].isNumber()) {
-                Backup::loadBackup();
+                Backup::loadBackup(levelID);
                 return playtime;
             }
             playtime += currPair[1].asInt().unwrap() - currPair[0].asInt().unwrap();
@@ -156,11 +162,11 @@ int Data::getLatestSession(std::string const& levelID) {
 }
 
 int Data::getSessionPlaytimeRaw(std::string const& levelID) {
-    auto data = getFile();
+    auto data = getFile(levelID);
 
     int playtime = 0;
 
-    auto& sessions = data[levelID]["sessions"];
+    auto& sessions = data["sessions"];
     auto& latestSession = sessions[sessions.size() - 1];
 
     time_t timestamp;
@@ -172,11 +178,11 @@ int Data::getSessionPlaytimeRaw(std::string const& levelID) {
 
 // do this inside level
 int Data::getPlaytimeRaw(std::string const& levelID) {
-    auto data = getFile();
+    auto data = getFile(levelID);
 
     int playtime = 0;
 
-    auto& sessions = data[levelID]["sessions"];
+    auto& sessions = data["sessions"];
     auto& latestSession = sessions[sessions.size() - 1];
     auto& latestPair = latestSession[latestSession.size() - 1];
 
@@ -249,10 +255,10 @@ std::string Data::formattedPlaytime(int playtime) {
 }
 
 tm Data::getLastPlayedRaw(std::string const& levelID) {
-    auto data = getFile();
+    auto data = getFile(levelID);
     time_t timestamp = time(nullptr);
 
-    auto& sessions = data[levelID]["sessions"];
+    auto& sessions = data["sessions"];
     auto& latestSession = sessions[sessions.size() - 1];
     auto& latestPair = latestSession[latestSession.size() - 1];
 
@@ -264,11 +270,11 @@ tm Data::getLastPlayedRaw(std::string const& levelID) {
 }
 
 tm Data::getPlayedRawAtIndex(std::string const& levelID, int index) {
-    auto data = getFile();
+    auto data = getFile(levelID);
     time_t timestamp = time(nullptr);
-    auto& sessionValue = data[levelID]["sessions"][index][0][0];
+    auto& sessionValue = data["sessions"][index][0][0];
     if (sessionValue.isNumber()) {
-        int sessionStart = data[levelID]["sessions"][index][0][0].asInt().unwrap();
+        int sessionStart = data["sessions"][index][0][0].asInt().unwrap();
         timestamp = static_cast<time_t>(sessionStart);
 
         return geode::localtime(timestamp);
@@ -280,12 +286,12 @@ tm Data::getPlayedRawAtIndex(std::string const& levelID, int index) {
 }
 
 int Data::getSessionPlaytimeRawAtIndex(std::string const& levelID, int index) {
-    auto data = getFile();
+    auto data = getFile(levelID);
     int playtime = 0;
-    for (auto& currPair : data[levelID]["sessions"][index]) {
+    for (auto& currPair : data["sessions"][index]) {
         if (currPair.size() >= 2) {
             if (!currPair[0].isNumber() || !currPair[1].isNumber()) {
-                Backup::loadBackup();
+                Backup::loadBackup(levelID);
                 return -1;
             }
             playtime += currPair[1].asInt().unwrap() - currPair[0].asInt().unwrap();
@@ -312,19 +318,19 @@ std::string Data::getPlayedFormatted(tm const& localTimestamp) {
 }
 
 int Data::getSessionCount(std::string const& levelID) {
-    auto data = getFile();
-    return data[levelID]["sessions"].size();
+    auto data = getFile(levelID);
+    return data["sessions"].size();
 }
 
 void Data::deleteLevelData(std::string const& levelID) {
-    auto data = getFile();
-    data[levelID]["sessions"] = matjson::Value::array();
-    writeFile(data);
+    auto data = getFile(levelID);
+    data["sessions"] = matjson::Value::array();
+    writeFile(data, levelID);
 }
 
 void Data::deleteSessionAtIndex(std::string const& levelID, int const index) {
-    auto data = getFile();
-    auto& sessions = data[levelID]["sessions"];
+    auto data = getFile(levelID);
+    auto& sessions = data["sessions"];
 
     if (sessions.size() == 1) {
         deleteLevelData(levelID);
@@ -339,15 +345,15 @@ void Data::deleteSessionAtIndex(std::string const& levelID, int const index) {
 
         sessions = newSessions;
 
-        writeFile(data);
+        writeFile(data, levelID);
     }
 }
 
 void Data::fixSessionAtIndex(std::string const& levelID, int const index) {
-    auto data = getFile();
+    auto data = getFile(levelID);
 
     auto newSession = matjson::Value::array();
-    auto& session = data[levelID]["sessions"][index];
+    auto& session = data["sessions"][index];
     for (auto& currPair : session) {
         if (currPair.size() >= 2) newSession.push(currPair);
     }
@@ -355,12 +361,12 @@ void Data::fixSessionAtIndex(std::string const& levelID, int const index) {
 
     if (newSession.size() == 0) Data::deleteSessionAtIndex(levelID, index);
 
-    writeFile(data);
+    writeFile(data, levelID);
 }
 
 int Data::getTotalPlaytime(std::string const& levelID) {
-    auto data = getFile();
-    auto& sessions = data[levelID]["sessions"];
+    auto data = getFile(levelID);
+    auto& sessions = data["sessions"];
     time_t timestamp;
 
     int playtime = 0;
@@ -391,41 +397,41 @@ void Data::appendPlayedLevel(std::string const& levelID) {
 void Data::appendPauseTimestamp(std::string const& levelID, time_t timestamp) {
     if (Settings::getStopOnCompletion() && Mod::get()->getSavedValue<int>("current-level-best") == 100) return;
 
-    auto data = getFile();
+    auto data = getFile(levelID);
 
-    auto& sessions = data[levelID]["sessions"];
+    auto& sessions = data["sessions"];
     auto& latestSession = sessions[sessions.size() - 1];
 
     latestSession[latestSession.size() - 1].push(timestamp);
 
-    writeFile(data);
+    writeFile(data, levelID);
 }
 
 void Data::initAttemptsList(std::string const& levelID) {
-    auto data = getFile();
+    auto data = getFile(levelID);
 
-    auto& attempts = data[levelID]["attempts"];
+    auto& attempts = data["attempts"];
 
     if (attempts.isArray()) return;
 
     attempts = matjson::Value::array();
 
-    writeFile(data);
+    writeFile(data, levelID);
 }
 
 void Data::appendAttempts(std::string const& levelID, int newAttempts) {
-    auto data = getFile();
-    auto& attempts = data[levelID]["attempts"];
+    auto data = getFile(levelID);
+    auto& attempts = data["attempts"];
 
 
     attempts.push(newAttempts);
 
-    writeFile(data);
+    writeFile(data, levelID);
 }
 
 void Data::addSessionAttempts(std::string const& levelID, int newAttempts) {
-    auto data = getFile();
-    auto& attempts = data[levelID]["attempts"];
+    auto data = getFile(levelID);
+    auto& attempts = data["attempts"];
     auto& latestAttempts = attempts[attempts.size() - 1];
 
     if (!latestAttempts.isExactlyUInt()) return;
@@ -434,7 +440,7 @@ void Data::addSessionAttempts(std::string const& levelID, int newAttempts) {
     int count = latestAttempts.asInt().unwrap();
 
     latestAttempts = count + newAttempts;
-    writeFile(data);
+    writeFile(data, levelID);
 
     // return;
 
@@ -442,8 +448,8 @@ void Data::addSessionAttempts(std::string const& levelID, int newAttempts) {
 }
 
 int Data::getLevelAttempts(std::string const& levelID) {
-    auto data = getFile();
-    auto& attempts = data[levelID]["attempts"];
+    auto data = getFile(levelID);
+    auto& attempts = data["attempts"];
 
     int sum = 0;
 
@@ -455,8 +461,8 @@ int Data::getLevelAttempts(std::string const& levelID) {
 }
 
 int Data::getSessionAttemptsAtIndex(std::string const& levelID, int index) {
-    auto data = getFile();
-    auto& attempts = data[levelID]["attempts"];
+    auto data = getFile(levelID);
+    auto& attempts = data["attempts"];
     if (index < 0) return -1;
 
     if (index < attempts.size()) return attempts[index].asInt().unwrap();
@@ -465,8 +471,8 @@ int Data::getSessionAttemptsAtIndex(std::string const& levelID, int index) {
 }
 
 int Data::getAttemptSessionCount(std::string const& levelID) {
-    auto data = getFile();
-    auto& attempts = data[levelID]["attempts"];
+    auto data = getFile(levelID);
+    auto& attempts = data["attempts"];
 
     return attempts.size();
 }

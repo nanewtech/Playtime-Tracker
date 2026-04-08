@@ -11,7 +11,7 @@ $on_mod (Loaded){
 	Mod::get()->setSavedValue<bool>("is-paused", false);
 
 	// convert from v1.1 to v1.2
-	//if (!Mod::get()->setSavedValue<bool>("updated-save", true)) {
+	if (!Mod::get()->setSavedValue<bool>("updated-save", true)) {
 		auto success = arc::spawn([] -> arc::Future<bool> {
 			bool success{true};
 			auto newPath = Mod::get()->getSaveDir() / "data";
@@ -63,5 +63,6 @@ $on_mod (Loaded){
 
 			co_return success;
 		});
-	//}
+	if (!success) Mod::get()->setSavedValue<bool>("updated-save", false);
+	}
 }

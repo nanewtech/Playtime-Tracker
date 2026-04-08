@@ -6,9 +6,9 @@
 
 class Data {
 public: 
-	static bool fileExists();
+	static bool fileExists(std::string const& levelID);
 
-	static matjson::Value getFile();
+	static matjson::Value getFile(std::string const& levelID);
 
 	static void startLevel(std::string const& levelID);
 
@@ -38,9 +38,9 @@ public:
 
 	static void deleteLevelData(std::string const& levelID);
 
-	static void deleteSessionAtIndex(std::string const& levelID, int const index);
+	static void deleteSessionAtIndex(std::string const& levelID, int index);
 
-	static void fixSessionAtIndex(std::string const& levelID, int const index);
+	static void fixSessionAtIndex(std::string const& levelID, int index);
 
 	static int getTotalPlaytime(std::string const& levelID);
 
