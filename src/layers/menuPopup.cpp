@@ -100,6 +100,8 @@ bool MenuPopup::init(GJGameLevel* level) {
     std::string levelID = fmt::to_string(EditorIDs::getID(level));
     if (level->m_levelType == GJLevelType::Editor) levelID = fmt::format("Editor-{}", levelID);
 
+    m_levelID = levelID;
+
     std::string levelName = level->m_levelName;
 
     auto subtitleLabel = CCLabelBMFont::create(fmt::format("{} - Sessions: {}", levelName, Data::getSessionCount(levelID)).c_str(), "goldFont.fnt");
@@ -190,35 +192,26 @@ bool MenuPopup::init(GJGameLevel* level) {
     // I REALLY wanted to use the proper word for it cause it sounds funny
     auto throbber = LoadingCircle::create();
     throbber->setID("pt-throbber");
-    throbber->setParent(scrollLayer);
-    throbber->setZOrder(2000);
-    throbber->setPosition({ scrollLayer->getContentSize()/2 });
+    throbber->setParentLayer(scrollLayer);
+    //throbber->setPosition({ scrollLayer->getContentSize()/2 });
     throbber->show();
+    throbber->setZOrder(2000);
+    throbber->setPosition({ -145.f,-50.f }); // -148 -37
 
+    auto loadingLabel = CCLabelBMFont::create("Loading data", "goldFont.fnt");
+    loadingLabel->setScale(0.75f);
+    loadingLabel->setPosition({ 140.f,60.f }); // 138 73
+    loadingLabel->setID("pt-loading-label");
+    scrollLayer->addChild(loadingLabel);
 
+    m_throbber = throbber;
 
-    async::TaskHolder<> buildSession;
-    buildSession.spawn(
+    buildSessionTask.spawn(
         "Playtime Tracker Session Task",
-        MenuPopup::createSessions(levelID),
-            [this, levelID] {
-                log::debug("callback called");
-                auto sessionCount = Data::getSessionCount(levelID);
-
-                m_scrollLayer->m_contentLayer->setContentSize({ 265.f, 180.f + 45.f * (sessionCount) });
-
-                if (m_scrollLayer->m_contentLayer->getContentHeight() < 196.f) m_scrollLayer->m_contentLayer->setContentSize({ 265.f, 196.f});
-
-                auto noSessionLabel = CCLabelBMFont::create("No sessions yet!", "bigFont.fnt");
-                noSessionLabel->setScale(0.35f);
-
-                if (sessionCount == 0) m_scrollLayer->m_contentLayer->addChild(noSessionLabel);
-
-                m_scrollLayer->m_contentLayer->updateLayout();
-
-                m_scrollLayer->scrollToTop();
-
-                m_mainLayer->getChildByID("pt-throbber")->setVisible(false);
+        createSessions(levelID),
+            [this] {
+                m_taskDone = true;
+                this->scheduleUpdate();
             }
         );
 
@@ -278,16 +271,30 @@ bool MenuPopup::init(GJGameLevel* level) {
 
     m_mainLayer->addChild(scrollbar);
     m_mainLayer->addChild(scrollLayer);
+    m_scrollLayer = scrollLayer;
+    scrollLayer->m_contentLayer->setVisible(false);
 	// m_mainLayer->addChildAtPosition(label, Anchor::Center);
 	return true;
 }
 
 arc::Future<> MenuPopup::createSessions(std::string const levelID) {
+    co_await arc::yield();
     auto sessionCount = Data::getSessionCount(levelID);
 
-    for (int i = sessionCount - 1; i >= 0; i--) {
+    for (int i = 0; i < sessionCount; i++) {
+        int offset = Data::getAttemptSessionCount(levelID) - Data::getSessionCount(levelID);
+            Session currSession = {
+                fmt::format("Session {} - {}", i + 1, Data::getPlayedFormatted(Data::getPlayedRawAtIndex(levelID, i) )),
+                Data::formattedPlaytime(Data::getSessionPlaytimeRawAtIndex(levelID, i)),
+                fmt::format("{} Attempts", Data::getSessionAttemptsAtIndex(levelID, offset + i)),
+                i
+            };
+        if (Data::getSessionPlaytimeRawAtIndex(levelID, i) == -1) currSession.playtime = "corrupted session, will disappear";
+        if (Data::getSessionAttemptsAtIndex(levelID, offset + i) == 1) currSession.attempts = "1 Attempt";
+        if (Data::getSessionAttemptsAtIndex(levelID, offset + i) < 1) currSession.attempts = "Untracked Attempts";
+
+        sessions.push_back(currSession);
         co_await arc::yield();
-            //TODO: implement calculation for elements, push on vector
         }
 
     co_return;
@@ -311,40 +318,61 @@ void MenuPopup::onClose(CCObject* sender) {
 }
 
 void MenuPopup::update(float delta) {
+    bool done = false;
     if (!buildSessionTask.isPending()) { // task is done
-        // TODO: put 10 elements every frame into contentLayer
         // TODO: figure out if it should always be 10 or if it should be adjustable in settings (3 levels? direct number?)
         int i = 0;
         while (i < 10) {
-            auto menu = sessionMenuElement(levelID, i);
-            menu->setID(fmt::format("session-{}", i + 1));
+            if (sessions.empty()) {
+                done = true;
+                break;
+            }
+            auto menu = sessionMenuElement();
+            menu->setID(fmt::format("session-{}", menu->getTag()));
             this->m_scrollLayer->m_contentLayer->addChild(menu);
             i++;
         }
     }
+    if (done) {
+        auto sessionCount = Data::getSessionCount(m_levelID);
+        m_scrollLayer->m_contentLayer->setContentSize({ 265.f, 180.f + 45.f * (sessionCount) });
+
+        if (m_scrollLayer->m_contentLayer->getContentHeight() < 196.f) m_scrollLayer->m_contentLayer->setContentSize({ 265.f, 196.f});
+
+        auto noSessionLabel = CCLabelBMFont::create("No sessions yet!", "bigFont.fnt");
+        noSessionLabel->setScale(0.35f);
+
+        if (sessionCount == 0) m_scrollLayer->m_contentLayer->addChild(noSessionLabel);
+
+        m_scrollLayer->m_contentLayer->updateLayout();
+
+        m_scrollLayer->scrollToTop();
+
+        m_throbber->removeMeAndCleanup();
+        m_scrollLayer->m_contentLayer->setVisible(true);
+        m_scrollLayer->getChildByID("pt-loading-label")->removeMeAndCleanup();
+        this->unscheduleUpdate();
+    }
     Popup::update(delta);
 }
 
-CCMenu* MenuPopup::sessionMenuElement(std::string const& levelID, int index) {
+CCMenu* MenuPopup::sessionMenuElement() {
 
-    //TODO: change to take in session, assemble with data from session struct
-    log::debug("creating element {}", index);
+    if (sessions.empty()) return nullptr; // shouldn't ever happen but just in case
+    auto currSession = sessions.back();
+    auto index = currSession.index;
+
+
     auto menu = CCMenu::create();
     menu->setContentSize({ 265.f, 40.f });
     menu->setTag(index);
-    auto sessionTitle = CCLabelBMFont::create(fmt::format("Session {} - {}", index + 1, Data::getPlayedFormatted(Data::getPlayedRawAtIndex(levelID, index) )).c_str(), "bigFont.fnt");
-    auto sessionPlaytime = CCLabelBMFont::create("corrupted session, will disappear", "bigFont.fnt");
-    if (Data::getSessionPlaytimeRawAtIndex(levelID, index) != -1) sessionPlaytime = CCLabelBMFont::create(Data::formattedPlaytime(Data::getSessionPlaytimeRawAtIndex(levelID, index)).c_str(), "bigFont.fnt");
+    auto sessionTitle = CCLabelBMFont::create(currSession.sessionTitle.c_str(), "bigFont.fnt");
+    auto sessionPlaytime = CCLabelBMFont::create(currSession.playtime.c_str(), "bigFont.fnt");
 
 
     // value to offset index in case attempt sessions count is less than time session count (if you played a level update v1.1.0)
-    int offset = Data::getAttemptSessionCount(levelID) - Data::getSessionCount(levelID);
 
-    auto sessionAttempts = CCLabelBMFont::create(fmt::format("{} Attempts", Data::getSessionAttemptsAtIndex(levelID, offset + index)).c_str(), "bigFont.fnt");
-
-    if (Data::getSessionAttemptsAtIndex(levelID, offset + index) == 1) sessionAttempts->setCString("1 Attempt");
-
-    if (Data::getSessionAttemptsAtIndex(levelID, offset + index) < 1) sessionAttempts->setCString("Untracked Attempts");
+    auto sessionAttempts = CCLabelBMFont::create(currSession.attempts.c_str(), "bigFont.fnt");
 
     auto deleteSprite = CCSprite::createWithSpriteFrameName("GJ_trashBtn_001.png");
 
@@ -357,7 +385,7 @@ CCMenu* MenuPopup::sessionMenuElement(std::string const& levelID, int index) {
     );
 
     deleteSessionButton->setTag(index);
-    deleteSessionButton->setUserObject("level-id", CCString::create(levelID));
+    deleteSessionButton->setUserObject("level-id", CCString::create(m_levelID));
 
     sessionTitle->setPosition({ 0.f,40.f });
     sessionTitle->limitLabelWidth(600.f, .35f, .1f);
@@ -374,13 +402,13 @@ CCMenu* MenuPopup::sessionMenuElement(std::string const& levelID, int index) {
     sessionAttempts->setColor({200, 200, 200});
 
     deleteSessionButton->setPosition({ 240.f, 20.f });
-    if (Data::getSessionCount(levelID) > 1) menu->addChild(deleteSessionButton);
+    if (Data::getSessionCount(m_levelID) > 1) menu->addChild(deleteSessionButton);
 
     menu->addChild(sessionTitle);
     menu->addChild(sessionPlaytime);
     menu->addChild(sessionAttempts);
 
-    log::debug("finished session {}", index);
+    sessions.pop_back();
 
     return menu;
 }

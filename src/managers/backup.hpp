@@ -11,4 +11,7 @@ public:
 	static bool fileExists(std::string const& levelID);
 	static void createBackup(matjson::Value const& data, std::string const& levelID);
 	static void loadBackup(std::string const& levelID);
+
+	static bool legacyFileExists();
+	static std::filesystem::path getLegacyBackupDirPath();
 };

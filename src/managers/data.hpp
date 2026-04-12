@@ -6,7 +6,7 @@
 #include <Geode/utils/async.hpp>
 
 class Data {
-public: 
+public:
 	static bool fileExists(std::string const& levelID);
 
 	static bool legacyFileExists();

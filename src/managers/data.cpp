@@ -2,6 +2,8 @@
 #include "settings.hpp"
 #include "backup.hpp"
 
+#include <arc/task/Yield.hpp>
+
 
 using namespace geode::prelude;
 
@@ -11,6 +13,8 @@ typedef struct {
     matjson::Value data;
     bool changed;
 }cachedLevel;
+
+bool writing = false; // make sure you cant read and write data simultaneously
 
 std::unordered_map<std::string, cachedLevel> levelCache;
 
@@ -29,8 +33,8 @@ bool Data::fileExists(std::string const& levelID) {
 bool Data::legacyFileExists() {
     return std::filesystem::exists(getLegacyDataDirPath());
 }
+
 void putCachedLevel(std::string const& levelID, matjson::Value const& data) {
-    log::info("put into cache");
     levelCache[levelID] = cachedLevel(data, true);
 }
 
@@ -44,11 +48,14 @@ void writeFile(matjson::Value const& data, std::string const& levelID) {
 }
 
 void Data::flushCache() {
-    log::info("flushing Cashe to disk!");
-    for (const auto& [levelID, level] : levelCache)
+        // fix crash by copying to avoid invalidating iterator
+        auto cache = levelCache;
+        for (const auto& [levelID, level] : cache) {
         if (level.changed) {
-            (void)file::writeString(getDataDirPath(levelID), level.data.dump(matjson::NO_INDENTATION));
+            auto output = level.data.dump(matjson::NO_INDENTATION);
+            (void)file::writeString(getDataDirPath(levelID), output);
         }
+    }
 }
 
 static void initializeFile(std::string const& levelID) {
@@ -62,8 +69,8 @@ static void initializeFile(std::string const& levelID) {
 
 matjson::Value Data::getFile(std::string const& levelID) {
     if (levelCache.contains(levelID)) {
-        log::info("read from cache");
-        return levelCache[levelID].data;
+        auto data = levelCache[levelID].data;
+        return data;
     }
 
     if (Data::fileExists(levelID)) {
@@ -84,18 +91,28 @@ matjson::Value Data::getFile(std::string const& levelID) {
         log::warn("backup doesn't exist, loading legacy file temporarily (loading might be extremely slow, restart the game!)");
         if (auto data = file::readJson(getLegacyDataDirPath())) {
             putCachedLevel(levelID, data.unwrap());
-            if (const auto& legacyData = data.unwrap(); legacyData[levelID]["sessions"].isNull())
+            if (const auto& legacyData = data.unwrap(); legacyData[levelID]["sessions"].isNull()){
                 return legacyData[levelID]; // return data if level is in old data
+            }
         }
     }
 
+    if (Backup::legacyFileExists()) {
+        log::warn("legacy file doesnt exist, loading legacy file backup temporarily (loading might be extremely slow, restart the game!)");
+        if (auto data = file::readJson(Backup::getLegacyBackupDirPath())) {
+            putCachedLevel(levelID, data.unwrap());
+            if (const auto& legacyData = data.unwrap(); legacyData[levelID]["sessions"].isNull()){
+                return legacyData[levelID]; // return data if level is in old backup
+            }
+        }
+    }
         log::info("no data found, Creating empty {}.json!", levelID);
-        initializeFile(levelID);
         matjson::Value data;
         data["version"] = 2;
         data["linked"] = matjson::Value::array();
         data["sessions"] = matjson::Value::array();
         putCachedLevel(levelID, data);
+        initializeFile(levelID);
         return data;
 }
 

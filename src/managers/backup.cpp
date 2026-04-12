@@ -6,6 +6,13 @@ static std::filesystem::path getBackupDirPath(std::string const& levelID) {
 	return Mod::get()->getSaveDir() / "data" / (levelID + ".backup");
 }
 
+std::filesystem::path Backup::getLegacyBackupDirPath() {
+	return Mod::get()->getSaveDir() / "leveldata.backup";
+}
+
+bool Backup::legacyFileExists() {
+	return std::filesystem::exists(getLegacyBackupDirPath());
+}
 
 bool Backup::fileExists(std::string const& levelID) {
 	return std::filesystem::exists(getBackupDirPath(levelID));

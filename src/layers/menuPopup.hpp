@@ -9,17 +9,20 @@ using namespace geode::prelude;
 class MenuPopup : public geode::Popup {
 protected:
 	GJGameLevel* m_level;
+	std::string m_levelID;
 	ScrollLayer* m_scrollLayer;
+	LoadingCircle* m_throbber;
+	bool m_taskDone = false;
 	async::TaskHolder<> buildSessionTask;
 
 	typedef struct {
-		std::string datePlayed;
+		std::string sessionTitle;
 		std::string playtime;
 		std::string attempts;
 		int index;
-	} session;
+	} Session;
 
-	std::vector<session> sessions;
+	std::vector<Session> sessions;
 
 	bool init(GJGameLevel* level);
 	arc::Future<> createSessions(std::string const levelID);
@@ -27,5 +30,5 @@ protected:
 	void update(float delta) override;
 public:
 	static MenuPopup* create(GJGameLevel* level);
-	static CCMenu* sessionMenuElement(std::string const& levelID, int index);
+	CCMenu* sessionMenuElement();
 };
