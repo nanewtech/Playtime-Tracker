@@ -7,18 +7,48 @@ using namespace geode::prelude;
 
 std::unordered_set<std::string> playedIDs;
 
+typedef struct {
+    matjson::Value data;
+    bool changed;
+}cachedLevel;
+
+std::unordered_map<std::string, cachedLevel> levelCache;
+
 std::filesystem::path getDataDirPath(std::string const& levelID) {
     return Mod::get()->getSaveDir() / "data" / (levelID + ".json");
+}
+
+std::filesystem::path getLegacyDataDirPath() {
+    return Mod::get()->getSaveDir() / "leveldata.json";
 }
 
 bool Data::fileExists(std::string const& levelID) {
     return std::filesystem::exists(getDataDirPath(levelID));
 }
 
+bool Data::legacyFileExists() {
+    return std::filesystem::exists(getLegacyDataDirPath());
+}
+void putCachedLevel(std::string const& levelID, matjson::Value const& data) {
+    log::info("put into cache");
+    levelCache[levelID] = cachedLevel(data, true);
+}
+
 void writeFile(matjson::Value const& data, std::string const& levelID) {
     std::string output = data.dump(matjson::NO_INDENTATION); //lowkey just no indentation cause it makes editing the file harder = less "cheating" :skull: @mizuki :eyes: :eyes:
     // std::string output = data.dump();
-    (void)file::writeString(getDataDirPath(levelID), output);
+
+    putCachedLevel(levelID, data);
+    Data::flushCache();
+    // (void)file::writeString(getDataDirPath(levelID), output);
+}
+
+void Data::flushCache() {
+    log::info("flushing Cashe to disk!");
+    for (const auto& [levelID, level] : levelCache)
+        if (level.changed) {
+            (void)file::writeString(getDataDirPath(levelID), level.data.dump(matjson::NO_INDENTATION));
+        }
 }
 
 static void initializeFile(std::string const& levelID) {
@@ -31,26 +61,41 @@ static void initializeFile(std::string const& levelID) {
 }
 
 matjson::Value Data::getFile(std::string const& levelID) {
+    if (levelCache.contains(levelID)) {
+        log::info("read from cache");
+        return levelCache[levelID].data;
+    }
+
     if (Data::fileExists(levelID)) {
         if (auto data = file::readJson(getDataDirPath(levelID))) {
+            putCachedLevel(levelID, data.unwrap());
             return data.unwrap();
-        }
-        else {
-            log::info("{}.json broken, Loading backup!", levelID);
-            Backup::loadBackup(levelID);
         }
     }
     if (Backup::fileExists(levelID)) {
         log::info("{}.json doesn't exist, Loading backup!", levelID);
         Backup::loadBackup(levelID);
-        return Backup::getFile(levelID);
+        auto data = Backup::getFile(levelID);
+        putCachedLevel(levelID, data);
+        return data;
     }
-        log::info("backup doesn't exist, Creating empty {}.json!", levelID);
+
+    if (Data::legacyFileExists()) {
+        log::warn("backup doesn't exist, loading legacy file temporarily (loading might be extremely slow, restart the game!)");
+        if (auto data = file::readJson(getLegacyDataDirPath())) {
+            putCachedLevel(levelID, data.unwrap());
+            if (const auto& legacyData = data.unwrap(); legacyData[levelID]["sessions"].isNull())
+                return legacyData[levelID]; // return data if level is in old data
+        }
+    }
+
+        log::info("no data found, Creating empty {}.json!", levelID);
         initializeFile(levelID);
         matjson::Value data;
         data["version"] = 2;
         data["linked"] = matjson::Value::array();
         data["sessions"] = matjson::Value::array();
+        putCachedLevel(levelID, data);
         return data;
 }
 
@@ -78,7 +123,7 @@ void Data::startLevel(std::string const& levelID) {
 
     latestSession[latestSession.size() - 1].push(time(&timestamp));
 
-    writeFile(data, levelID);
+    putCachedLevel(levelID, data);
 }
 
 void Data::pauseLevel(std::string const& levelID) {
@@ -119,7 +164,7 @@ void Data::resumeLevel(std::string const& levelID, bool removePauseOverride) {
     latestSession.push(matjson::Value::array());
     latestSession[latestSession.size() - 1].push(time(&timestamp));
 
-    writeFile(data, levelID);
+    putCachedLevel(levelID, data);
 }
 
 void Data::exitLevel(std::string const& levelID) {

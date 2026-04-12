@@ -3,12 +3,17 @@
 #include <ctime>
 #include <matjson.hpp>
 #include <string>
+#include <Geode/utils/async.hpp>
 
 class Data {
 public: 
 	static bool fileExists(std::string const& levelID);
 
+	static bool legacyFileExists();
+
 	static matjson::Value getFile(std::string const& levelID);
+
+	static void flushCache();
 
 	static void startLevel(std::string const& levelID);
 

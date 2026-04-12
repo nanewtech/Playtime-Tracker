@@ -59,10 +59,18 @@ $on_mod (Loaded){
 				log::info("[{}/{}] Converted level {}", levelIndex, levelCount, levelID);
 			}
 
+			if (success) {
+				// TODO: delete/rename/move old files
+			}
+
 			log::info("Finished Converting");
 
 			co_return success;
 		});
 	if (!success) Mod::get()->setSavedValue<bool>("updated-save", false);
 	}
+}
+
+$on_game(Exiting) {
+	Data::flushCache(); // save data on shutdown
 }

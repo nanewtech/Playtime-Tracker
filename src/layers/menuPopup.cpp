@@ -2,6 +2,7 @@
 #include <Geode/Geode.hpp>
 #include <Geode/ui/ScrollLayer.hpp>
 #include <Geode/ui/GeodeUI.hpp>
+#include <arc/task/Yield.hpp>
 
 #include <cvolton.level-id-api/include/EditorIDs.hpp>
 
@@ -37,7 +38,7 @@ public:
                 }
             }
         );
-        
+
     }
 
     void onDeleteSessionButton(CCObject* sender) {
@@ -142,13 +143,13 @@ bool MenuPopup::init(GJGameLevel* level) {
     contentLayout->setAutoScale(false);
     contentLayout->setCrossAxisLineAlignment(geode::AxisAlignment::Start);
     contentLayout->setAxisReverse(true);
-    
-    
 
-    auto content = scrollLayer->getChildByID("content-layer");
+
+
+    auto content = scrollLayer->m_contentLayer;
     content->setPosition({ 10.f,0.f });
     content->setLayout(contentLayout);
-    
+
 
     // total and session
     content->addChild(totalTitle);
@@ -185,32 +186,47 @@ bool MenuPopup::init(GJGameLevel* level) {
     auto sessionLabel = CCLabelBMFont::create("Sessions", "goldFont.fnt");
     sessionLabel->setScale(0.75f);
     content->addChild(sessionLabel);
-    for (int i = Data::getSessionCount(levelID) - 1; i >= 0; i--) {
-        auto menu = sessionMenuElement(levelID, i);
-        menu->setID(fmt::format("session-{}", i + 1));
-        content->addChild(menu);
-    }
+
+    // I REALLY wanted to use the proper word for it cause it sounds funny
+    auto throbber = LoadingCircle::create();
+    throbber->setID("pt-throbber");
+    throbber->setParent(scrollLayer);
+    throbber->setZOrder(2000);
+    throbber->setPosition({ scrollLayer->getContentSize()/2 });
+    throbber->show();
 
 
-    
-    
-    content->setContentSize({ 265.f, 180.f + 45.f * (Data::getSessionCount(levelID)) });
 
-    if (content->getContentHeight() < 196.f) content->setContentSize({ 265.f, 196.f});
+    async::TaskHolder<> buildSession;
+    buildSession.spawn(
+        "Playtime Tracker Session Task",
+        MenuPopup::createSessions(levelID),
+            [this, levelID] {
+                log::debug("callback called");
+                auto sessionCount = Data::getSessionCount(levelID);
 
-    auto noSessionLabel = CCLabelBMFont::create("No sessions yet!", "bigFont.fnt");
-    noSessionLabel->setScale(0.35f);
+                m_scrollLayer->m_contentLayer->setContentSize({ 265.f, 180.f + 45.f * (sessionCount) });
 
-    if (Data::getSessionCount(levelID) == 0) content->addChild(noSessionLabel);
+                if (m_scrollLayer->m_contentLayer->getContentHeight() < 196.f) m_scrollLayer->m_contentLayer->setContentSize({ 265.f, 196.f});
 
-    content->updateLayout();
+                auto noSessionLabel = CCLabelBMFont::create("No sessions yet!", "bigFont.fnt");
+                noSessionLabel->setScale(0.35f);
 
-    scrollLayer->scrollToTop();
+                if (sessionCount == 0) m_scrollLayer->m_contentLayer->addChild(noSessionLabel);
+
+                m_scrollLayer->m_contentLayer->updateLayout();
+
+                m_scrollLayer->scrollToTop();
+
+                m_mainLayer->getChildByID("pt-throbber")->setVisible(false);
+            }
+        );
+
 
 
     // extra buttons (delete and settings stuff)
     auto extrabuttons = m_mainLayer->getChildByType<CCMenu>(0);
-    
+
     auto deleteSpr = CCSprite::createWithSpriteFrameName("GJ_trashBtn_001.png");
     deleteSpr->setScale(0.75f);
 
@@ -250,7 +266,7 @@ bool MenuPopup::init(GJGameLevel* level) {
 
 
     attemptsButton->setUserObject("level-id", CCString::create(levelID));
-    (void) attemptsButton->setUserData(level);
+    attemptsButton->setUserData(level);
 
     attemptsButton->setPosition({3.f, 0.f});
 
@@ -266,6 +282,17 @@ bool MenuPopup::init(GJGameLevel* level) {
 	return true;
 }
 
+arc::Future<> MenuPopup::createSessions(std::string const levelID) {
+    auto sessionCount = Data::getSessionCount(levelID);
+
+    for (int i = sessionCount - 1; i >= 0; i--) {
+        co_await arc::yield();
+            //TODO: implement calculation for elements, push on vector
+        }
+
+    co_return;
+}
+
 MenuPopup* MenuPopup::create(GJGameLevel* level) {
     auto ret = new MenuPopup();
     ret->m_level = level;
@@ -277,7 +304,31 @@ MenuPopup* MenuPopup::create(GJGameLevel* level) {
     return nullptr;
 }
 
+void MenuPopup::onClose(CCObject* sender) {
+    buildSessionTask.cancel();
+
+    Popup::onClose(sender);
+}
+
+void MenuPopup::update(float delta) {
+    if (!buildSessionTask.isPending()) { // task is done
+        // TODO: put 10 elements every frame into contentLayer
+        // TODO: figure out if it should always be 10 or if it should be adjustable in settings (3 levels? direct number?)
+        int i = 0;
+        while (i < 10) {
+            auto menu = sessionMenuElement(levelID, i);
+            menu->setID(fmt::format("session-{}", i + 1));
+            this->m_scrollLayer->m_contentLayer->addChild(menu);
+            i++;
+        }
+    }
+    Popup::update(delta);
+}
+
 CCMenu* MenuPopup::sessionMenuElement(std::string const& levelID, int index) {
+
+    //TODO: change to take in session, assemble with data from session struct
+    log::debug("creating element {}", index);
     auto menu = CCMenu::create();
     menu->setContentSize({ 265.f, 40.f });
     menu->setTag(index);
@@ -328,6 +379,8 @@ CCMenu* MenuPopup::sessionMenuElement(std::string const& levelID, int index) {
     menu->addChild(sessionTitle);
     menu->addChild(sessionPlaytime);
     menu->addChild(sessionAttempts);
+
+    log::debug("finished session {}", index);
 
     return menu;
 }
