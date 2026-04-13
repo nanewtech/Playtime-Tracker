@@ -3,6 +3,7 @@
 - added level cache to reduce unnecessary read operations when opening the menu popup
 - made loading the data asynchronous to prevent the game freezing while loading the menu popup
 - made the pause menu popup update when not using 'Remove pauses from playtime'
+- made it so the menu popup updates when deleting sessions
 - fixed an issue where 'remove pauses when AFK' would not remove pauses when exiting or resuming in certain ways
 # v1.1.0
 - Ported to 2.2081 

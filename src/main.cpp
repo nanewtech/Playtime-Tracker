@@ -72,5 +72,5 @@ $on_mod (Loaded){
 }
 
 $on_game(Exiting) {
-	//Data::flushCache(); // save data on shutdown (crashes game, fix that sometime idk)
+	Data::flushCache(); // save data on shutdown
 }

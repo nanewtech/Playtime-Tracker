@@ -16,54 +16,6 @@ public:
     }
 };
 
-
-class DeleteButton : public CCLayer {
-public:
-    void onDeleteAllButton(CCObject* sender) {
-
-        auto obj = static_cast<CCNode*>(sender)->getUserObject("level-id");
-        std::string levelID = static_cast<CCString*>(obj)->getCString();
-        geode::createQuickPopup(
-            "Delete level data",
-            "Are you sure you want to <cr>delete ALL data</c> on this level? (<cr>ALL your sessions will be deleted! This action is IRREVERSIBLE</c>)",
-            "Don't delete", "Delete everything",
-            [levelID](auto, bool btn2) {
-                if (btn2) {
-                    Data::deleteLevelData(levelID);
-                    if (!Settings::getDisableDeletionPopup()) FLAlertLayer::create(
-                        "Delete level Data",
-                        "Deleted all data. Reopen the popup for changes to take effect. <cy>You can disable this popup in the settings.</c>",
-                        "OK"
-                    )->show();
-                }
-            }
-        );
-
-    }
-
-    void onDeleteSessionButton(CCObject* sender) {
-        int index = static_cast<CCNode*>(sender)->getTag();
-
-        auto obj = static_cast<CCNode*>(sender)->getUserObject("level-id");
-        std::string levelID = static_cast<CCString*>(obj)->getCString();
-        geode::createQuickPopup(
-            "Delete session",
-            fmt::format("Are you sure you want to <cr>delete session {}</c> on this level? (<cr>This action is IRREVERSIBLE!</c>)", index + 1),
-            "Don't delete", "Delete session",
-            [levelID, index](auto, bool btn2) {
-                if (btn2) {
-                    Data::deleteSessionAtIndex(levelID, index);
-                    if (!Settings::getDisableDeletionPopup()) FLAlertLayer::create(
-                        "Delete session Data",
-                        fmt::format("Deleted session {}. Reopen the popup for changes to take effect. <cy>You can disable this popup in the settings.</c>", index + 1),
-                        "OK"
-                    )->show();
-                }
-            }
-        );
-    }
-};
-
 class OpenAttempts : public CCLayer {
 public:
     void open(CCObject* sender) {
@@ -110,17 +62,6 @@ bool MenuPopup::init(GJGameLevel* level) {
 
     m_mainLayer->addChild(subtitleLabel);
 
-
-	auto totalTitle = CCLabelBMFont::create("Total Playtime:", "goldFont.fnt");
-    auto totalValue = CCLabelBMFont::create(Data::formattedPlaytime(Data::getPlaytimeRaw(levelID)).c_str(), "bigFont.fnt");
-    auto sessionTitle = CCLabelBMFont::create("Last Session:", "goldFont.fnt");
-    auto sessionValue = CCLabelBMFont::create(Data::formattedPlaytime(Data::getLatestSession(levelID)).c_str(), "bigFont.fnt");
-
-    totalTitle->setScale(0.75f);
-    totalValue->limitLabelWidth(300.f, .35f, .1f);
-    sessionTitle->setScale(0.75f);
-    sessionValue->limitLabelWidth(300.f, .35f, .1f);
-
     // the scroll thing
     auto scrollLayer = geode::ScrollLayer::create({ 10.f,10.f,265.f,196.f});
     scrollLayer->setAnchorPoint({ 0.0f, 0.0f });
@@ -152,42 +93,7 @@ bool MenuPopup::init(GJGameLevel* level) {
     content->setPosition({ 10.f,0.f });
     content->setLayout(contentLayout);
 
-
-    // total and session
-    content->addChild(totalTitle);
-    content->addChild(totalValue);
-    content->addChild(sessionTitle);
-    content->addChild(sessionValue);
-
-
-    // data
-    std::string timeAttemptStat = Data::formattedPlaytime(Data::getPlaytimeRaw(levelID));
-    if (level->m_attempts != 0) timeAttemptStat = Data::formattedPlaytime(Data::getPlaytimeRaw(levelID) / level->m_attempts);
-    std::string timeSessionsStat = Data::formattedPlaytime(Data::getPlaytimeRaw(levelID));
-    if (Data::getSessionCount(levelID) != 0) timeSessionsStat = Data::formattedPlaytime(Data::getPlaytimeRaw(levelID) / Data::getSessionCount(levelID));
-
-    auto statsLabel = CCLabelBMFont::create("Level Stats", "goldFont.fnt");
-    auto lastPlayedLabel = CCLabelBMFont::create("Last Played: Never", "bigFont.fnt");
-    if (Data::getSessionCount(levelID) > 0) lastPlayedLabel = CCLabelBMFont::create(fmt::format("Last Played: {}", Data::getPlayedFormatted(Data::getLastPlayedRaw(levelID))).c_str(), "bigFont.fnt");
-    auto timeAttemptLabel = CCLabelBMFont::create(fmt::format("Time/Attempt: {}", timeAttemptStat).c_str(), "bigFont.fnt");
-    auto timeSessionsLabel = CCLabelBMFont::create(fmt::format("Time/Session: {}", timeSessionsStat).c_str(), "bigFont.fnt");
-
-    statsLabel->setScale(0.75f);
-
-    lastPlayedLabel->limitLabelWidth(650.f, .35f, .1f);
-    timeAttemptLabel->limitLabelWidth(650.f, .3f, .1f);
-    timeSessionsLabel->limitLabelWidth(650.f, .3f, .1f);
-
-    content->addChild(statsLabel);
-    content->addChild(lastPlayedLabel);
-    content->addChild(timeAttemptLabel);
-    content->addChild(timeSessionsLabel);
-
-
-    //sessions
-    auto sessionLabel = CCLabelBMFont::create("Sessions", "goldFont.fnt");
-    sessionLabel->setScale(0.75f);
-    content->addChild(sessionLabel);
+    initContentLayer(content);
 
     // I REALLY wanted to use the proper word for it cause it sounds funny
     auto throbber = LoadingCircle::create();
@@ -223,12 +129,36 @@ bool MenuPopup::init(GJGameLevel* level) {
     auto deleteSpr = CCSprite::createWithSpriteFrameName("GJ_trashBtn_001.png");
     deleteSpr->setScale(0.75f);
 
-    auto deleteButton = CCMenuItemSpriteExtra::create(
-        deleteSpr,
-        this,
-        menu_selector(DeleteButton::onDeleteAllButton)
+    auto deleteButton = CCMenuItemExt::createSpriteExtraWithFrameName(
+        "GJ_trashBtn_001.png",
+        0.75f,
+        [this] (auto) {
+            geode::createQuickPopup(
+                "Delete level data",
+                "Are you sure you want to <cr>delete ALL data</c> on this level? (<cr>ALL your sessions will be deleted! This action is IRREVERSIBLE</c>)",
+                "Don't delete", "Delete everything",
+                [this](auto, bool btn2) {
+                    if (btn2) {
+                        Data::deleteLevelData(m_levelID);
+                        if (!Settings::getDisableDeletionPopup()) FLAlertLayer::create(
+                            "Delete level Data",
+                            "Deleted all data. Reopen the popup for changes to take effect. <cy>You can disable this popup in the settings.</c>",
+                            "OK"
+                        )->show();
+                        m_scrollLayer->m_contentLayer->removeAllChildrenWithCleanup(true);
+                        initContentLayer(m_scrollLayer->m_contentLayer);
+
+                        auto noSessionLabel = CCLabelBMFont::create("No sessions yet!", "bigFont.fnt");
+                        noSessionLabel->setScale(0.35f);
+
+                        m_scrollLayer->m_contentLayer->addChild(noSessionLabel);
+                        m_scrollLayer->m_contentLayer->setContentHeight(180.f);
+                        m_scrollLayer->m_contentLayer->updateLayout();
+                    }
+                }
+            );
+        }
     );
-    deleteButton->setUserObject("level-id", CCString::create(levelID));
     deleteButton->setPosition({300.f, 0.f});
 
     extrabuttons->addChild(deleteButton);
@@ -264,10 +194,6 @@ bool MenuPopup::init(GJGameLevel* level) {
     attemptsButton->setPosition({3.f, 0.f});
 
     extrabuttons->addChild(attemptsButton);
-
-
-
-
 
     m_mainLayer->addChild(scrollbar);
     m_mainLayer->addChild(scrollLayer);
@@ -356,6 +282,51 @@ void MenuPopup::update(float delta) {
     Popup::update(delta);
 }
 
+void MenuPopup::initContentLayer(CCContentLayer* content) {
+    auto totalTitle = CCLabelBMFont::create("Total Playtime:", "goldFont.fnt");
+    auto totalValue = CCLabelBMFont::create(Data::formattedPlaytime(Data::getPlaytimeRaw(m_levelID)).c_str(), "bigFont.fnt");
+    auto sessionTitle = CCLabelBMFont::create("Last Session:", "goldFont.fnt");
+    auto sessionValue = CCLabelBMFont::create(Data::formattedPlaytime(Data::getLatestSession(m_levelID)).c_str(), "bigFont.fnt");
+
+    totalTitle->setScale(0.75f);
+    totalValue->limitLabelWidth(300.f, .35f, .1f);
+    sessionTitle->setScale(0.75f);
+    sessionValue->limitLabelWidth(300.f, .35f, .1f);
+
+    content->addChild(totalTitle);
+    content->addChild(totalValue);
+    content->addChild(sessionTitle);
+    content->addChild(sessionValue);
+
+    std::string timeAttemptStat = Data::formattedPlaytime(Data::getPlaytimeRaw(m_levelID));
+    if (m_level->m_attempts != 0) timeAttemptStat = Data::formattedPlaytime(Data::getPlaytimeRaw(m_levelID) / m_level->m_attempts);
+    std::string timeSessionsStat = Data::formattedPlaytime(Data::getPlaytimeRaw(m_levelID));
+    if (Data::getSessionCount(m_levelID) != 0) timeSessionsStat = Data::formattedPlaytime(Data::getPlaytimeRaw(m_levelID) / Data::getSessionCount(m_levelID));
+
+    auto statsLabel = CCLabelBMFont::create("Level Stats", "goldFont.fnt");
+    auto lastPlayedLabel = CCLabelBMFont::create("Last Played: Never", "bigFont.fnt");
+    if (Data::getSessionCount(m_levelID) > 0) lastPlayedLabel = CCLabelBMFont::create(fmt::format("Last Played: {}", Data::getPlayedFormatted(Data::getLastPlayedRaw(m_levelID))).c_str(), "bigFont.fnt");
+    auto timeAttemptLabel = CCLabelBMFont::create(fmt::format("Time/Attempt: {}", timeAttemptStat).c_str(), "bigFont.fnt");
+    auto timeSessionsLabel = CCLabelBMFont::create(fmt::format("Time/Session: {}", timeSessionsStat).c_str(), "bigFont.fnt");
+
+    statsLabel->setScale(0.75f);
+
+    lastPlayedLabel->limitLabelWidth(650.f, .35f, .1f);
+    timeAttemptLabel->limitLabelWidth(650.f, .3f, .1f);
+    timeSessionsLabel->limitLabelWidth(650.f, .3f, .1f);
+
+    content->addChild(statsLabel);
+    content->addChild(lastPlayedLabel);
+    content->addChild(timeAttemptLabel);
+    content->addChild(timeSessionsLabel);
+
+
+    //sessions
+    auto sessionLabel = CCLabelBMFont::create("Sessions", "goldFont.fnt");
+    sessionLabel->setScale(0.75f);
+    content->addChild(sessionLabel);
+}
+
 CCMenu* MenuPopup::sessionMenuElement() {
 
     if (sessions.empty()) return nullptr; // shouldn't ever happen but just in case
@@ -378,10 +349,28 @@ CCMenu* MenuPopup::sessionMenuElement() {
 
     deleteSprite->setScale(0.55f);
 
-    auto deleteSessionButton = CCMenuItemSpriteExtra::create(
-        deleteSprite,
-        menu,
-        menu_selector(DeleteButton::onDeleteSessionButton)
+    auto deleteSessionButton = CCMenuItemExt::createSpriteExtraWithFrameName(
+        "GJ_trashBtn_001.png",
+        .55f,
+        [this, index](auto) {
+            geode::createQuickPopup(
+                "Delete session",
+                fmt::format("Are you sure you want to <cr>delete session {}</c> on this level? (<cr>This action is IRREVERSIBLE!</c>)", index + 1),
+                "Don't delete", "Delete session",
+                [this, index](auto, bool btn2) {
+                    if (btn2) {
+                        Data::deleteSessionAtIndex(m_levelID, index);
+                        if (!Settings::getDisableDeletionPopup()) FLAlertLayer::create(
+                            "Delete session Data",
+                            fmt::format("Deleted session {}. Reopen the popup for changes to take effect. <cy>You can disable this popup in the settings.</c>", index + 1),
+                            "OK"
+                        )->show();
+                        m_scrollLayer->m_contentLayer->removeChildByTag(index);
+                        m_scrollLayer->m_contentLayer->updateLayout();
+                    }
+                }
+            );
+        }
     );
 
     deleteSessionButton->setTag(index);

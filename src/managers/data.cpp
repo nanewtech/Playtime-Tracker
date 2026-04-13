@@ -2,8 +2,6 @@
 #include "settings.hpp"
 #include "backup.hpp"
 
-#include <arc/task/Yield.hpp>
-
 
 using namespace geode::prelude;
 
@@ -13,8 +11,6 @@ typedef struct {
     matjson::Value data;
     bool changed;
 }cachedLevel;
-
-bool writing = false; // make sure you cant read and write data simultaneously
 
 std::unordered_map<std::string, cachedLevel> levelCache;
 
@@ -39,22 +35,20 @@ void putCachedLevel(std::string const& levelID, matjson::Value const& data) {
 }
 
 void writeFile(matjson::Value const& data, std::string const& levelID) {
-    std::string output = data.dump(matjson::NO_INDENTATION); //lowkey just no indentation cause it makes editing the file harder = less "cheating" :skull: @mizuki :eyes: :eyes:
-    // std::string output = data.dump();
-
     putCachedLevel(levelID, data);
     Data::flushCache();
-    // (void)file::writeString(getDataDirPath(levelID), output);
+
+    //auto const& output = data.dump(matjson::NO_INDENTATION);
+    //(void)file::writeString(getDataDirPath(levelID), output);
 }
 
 void Data::flushCache() {
-        // fix crash by copying to avoid invalidating iterator
-        auto cache = levelCache;
-        for (const auto& [levelID, level] : cache) {
-        if (level.changed) {
-            auto output = level.data.dump(matjson::NO_INDENTATION);
-            (void)file::writeString(getDataDirPath(levelID), output);
-        }
+    for (auto& [levelID, level] : levelCache) {
+        if (!level.changed) continue;
+
+        auto const& output = level.data.dump(matjson::NO_INDENTATION);
+        (void)file::writeString(getDataDirPath(levelID), output);
+        level.changed = false;
     }
 }
 

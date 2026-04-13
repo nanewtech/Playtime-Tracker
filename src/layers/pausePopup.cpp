@@ -3,12 +3,13 @@
 #include <cvolton.level-id-api/include/EditorIDs.hpp>
 
 #include "../managers/data.hpp"
-
-using namespace geode::prelude;
+#include "../managers/settings.hpp"
 
 bool PausePopup::init(std::string const& levelID) {
 
     if (!Popup::init(240.f, 160.f)) return false;
+
+    m_levelID = levelID;
 
     this->setID("Playtime-Tracker-Popup"_spr);
     this->setTitle("Playtime Tracker");
@@ -57,8 +58,13 @@ bool PausePopup::init(std::string const& levelID) {
     content->addChild(playtimeTitle);
     content->addChild(playtimeLabel);
 
+    m_totalLabel = totalLabel;
+    m_playtimeLabel = playtimeLabel;
+    m_content = content;
+
     content->updateLayout();
     m_mainLayer->addChild(content);
+    if (!Settings::getRemovePauses()) this->scheduleUpdate();
     return true;
 }
 
@@ -72,4 +78,18 @@ PausePopup* PausePopup::create(std::string const& levelID) {
 
     delete ret;
     return nullptr;
+}
+
+void PausePopup::update(float delta) {
+    deltaAccumulator += delta;
+
+    if (deltaAccumulator >= 1.f) {
+        m_totalLabel->setCString(Data::formattedPlaytime(Data::getTotalPlaytime(m_levelID)).c_str());
+        auto playtime = Data::getSessionPlaytimeRaw(m_levelID);
+        m_playtimeLabel->setCString(Data::formattedPlaytime(playtime).c_str());
+        m_content->updateLayout();
+        deltaAccumulator = 0.f;
+    }
+
+    Popup::update(delta);
 }

@@ -28,6 +28,7 @@ protected:
 	arc::Future<> createSessions(std::string const levelID);
 	void onClose(CCObject* sender) override;
 	void update(float delta) override;
+	void initContentLayer(CCContentLayer* content);
 public:
 	static MenuPopup* create(GJGameLevel* level);
 	CCMenu* sessionMenuElement();
