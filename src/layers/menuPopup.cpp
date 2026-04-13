@@ -153,6 +153,7 @@ bool MenuPopup::init(GJGameLevel* level) {
 
                         m_scrollLayer->m_contentLayer->addChild(noSessionLabel);
                         m_scrollLayer->m_contentLayer->setContentHeight(180.f);
+                        m_scrollLayer->scrollToTop();
                         m_scrollLayer->m_contentLayer->updateLayout();
                     }
                 }

@@ -381,17 +381,23 @@ int Data::getSessionCount(std::string const& levelID) {
 void Data::deleteLevelData(std::string const& levelID) {
     auto data = getFile(levelID);
     data["sessions"] = matjson::Value::array();
+    data["linked"] = matjson::Value::array();
+    data["attempts"] = matjson::Value::array();
     writeFile(data, levelID);
 }
 
 void Data::deleteSessionAtIndex(std::string const& levelID, int const index) {
     auto data = getFile(levelID);
     auto& sessions = data["sessions"];
+    auto& attempts = data["attempts"];
+
+    int offset = Data::getAttemptSessionCount(levelID) - Data::getSessionCount(levelID);
 
     if (sessions.size() == 1) {
         deleteLevelData(levelID);
     } else {
         sessions[index] = NULL;
+        attempts[index + offset] = NULL;
 
         auto newSessions = matjson::Value::array();
 
@@ -399,7 +405,15 @@ void Data::deleteSessionAtIndex(std::string const& levelID, int const index) {
             if (!currItem[0].isNull()) newSessions.push(currItem);
         }
 
+        auto newAttempts = matjson::Value::array();
+
+        for (auto& currItem : attempts) {
+            if (currItem.asInt().unwrap() != 0) newAttempts.push(currItem);
+        }
+
         sessions = newSessions;
+
+        attempts = newAttempts;
 
         writeFile(data, levelID);
     }
