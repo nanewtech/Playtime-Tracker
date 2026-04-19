@@ -45,23 +45,26 @@ $on_mod (Loaded){
 
 				if (level.getKey()->empty()) { // if level somehow doesn't have a levelID associated with it
 					success = false;
-					log::warn("[{}/{}] Skipping due to broken levelID!", levelIndex, levelCount);
+					log::warn("[{}/{}] Skipping {} due to broken levelID!", levelIndex, levelCount, levelID);
 					continue;
 				}
 
 				levelID = level.getKey().value();
 
+				if (Data::fileExists(levelID)) {
+					log::warn("[{}/{}] Skipping {} due to existing data in target directory (delete file if this is an error)!", levelIndex, levelCount, levelID);
+					continue;
+				}
+
 				level["version"] = 2;
 				level["linked"] = matjson::Value::array();
 
 				std::string output = level.dump(matjson::NO_INDENTATION);
-				if (!file::writeString(newPath/ (levelID + ".json"), output)) success = false;
+				if (!file::writeStringSafe(newPath/ (levelID + ".json"), output)) success = false;
 				log::info("[{}/{}] Converted level {}", levelIndex, levelCount, levelID);
 			}
 
-			if (success) {
-				// TODO: delete/rename/move old files
-			}
+			if (success) log::info("Successfully converted {} levels!", levelCount);
 
 			log::info("Finished Converting");
 

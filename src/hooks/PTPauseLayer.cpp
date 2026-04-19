@@ -77,7 +77,6 @@ class $modify(PTPauseLayer, PauseLayer) {
 
 		// auto btn = static_cast<CCMenuItemSpriteExtra*>(sender);
 
-		// TODO: Make popup for pause menu, call it here
 
 		
 		PausePopup::create(m_fields->m_levelID)->show();

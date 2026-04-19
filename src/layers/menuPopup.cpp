@@ -248,8 +248,11 @@ void MenuPopup::update(float delta) {
     bool done = false;
     if (!buildSessionTask.isPending()) { // task is done
         // TODO: figure out if it should always be 10 or if it should be adjustable in settings (3 levels? direct number?)
+        // ill figure that out when problems happen but rn this is fine
+        int menuPerFrameCount = 10;
+
         int i = 0;
-        while (i < 10) {
+        while (i < menuPerFrameCount) {
             if (sessions.empty()) {
                 done = true;
                 break;

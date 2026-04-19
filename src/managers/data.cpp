@@ -47,7 +47,7 @@ void Data::flushCache() {
         if (!level.changed) continue;
 
         auto const& output = level.data.dump(matjson::NO_INDENTATION);
-        (void)file::writeString(getDataDirPath(levelID), output);
+        (void)file::writeStringSafe(getDataDirPath(levelID), output);
         level.changed = false;
     }
 }

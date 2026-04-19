@@ -29,7 +29,7 @@ matjson::Value Backup::getFile(std::string const& levelID) {
 
 void Backup::writeFile(matjson::Value const& data, std::string const& levelID) {
 	auto const& output = data.dump(matjson::NO_INDENTATION);
-	(void)file::writeString(getBackupDirPath(levelID), output);
+	(void)file::writeStringSafe(getBackupDirPath(levelID), output);
 }
 
 void Backup::createBackup(matjson::Value const& data, std::string const& levelID) {
@@ -40,5 +40,5 @@ void Backup::createBackup(matjson::Value const& data, std::string const& levelID
 void Backup::loadBackup(std::string const& levelID) {
 	auto data = Backup::getFile(levelID);
 	auto const& output = data.dump(matjson::NO_INDENTATION);
-	(void)file::writeString(Mod::get()->getSaveDir() / "data" / (levelID + ".json"), output);
+	(void)file::writeStringSafe(Mod::get()->getSaveDir() / "data" / (levelID + ".json"), output);
 }
