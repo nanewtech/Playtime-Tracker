@@ -1,3 +1,5 @@
+# v1.2.2
+- fixed a typo where junk data would be created, preventing real data to ever be written
 # v1.2.1
 - made it so level data is now in a separate file for each level instead of one big file to prevent lag when saving / loading
 - added level cache to reduce unnecessary read operations when opening the menu popup

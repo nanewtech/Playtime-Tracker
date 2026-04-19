@@ -58,6 +58,8 @@ static void initializeFile(std::string const& levelID) {
     data["linked"] = matjson::Value::array();
     data["sessions"] = matjson::Value::array();
 
+
+
     writeFile(data, levelID);
 }
 
@@ -82,20 +84,22 @@ matjson::Value Data::getFile(std::string const& levelID) {
     }
 
     if (Data::legacyFileExists()) {
-        log::warn("backup doesn't exist, loading legacy file temporarily (loading might be extremely slow, restart the game!)");
         if (auto data = file::readJson(getLegacyDataDirPath())) {
-            putCachedLevel(levelID, data.unwrap());
-            if (const auto& legacyData = data.unwrap(); legacyData[levelID]["sessions"].isNull()){
+            const auto& legacyData = data.unwrap();
+            if (!legacyData[levelID]["sessions"].isNull()){
+                log::warn("backup doesn't exist, loading legacy file temporarily (loading might be extremely slow, restart the game!)");
+                putCachedLevel(levelID, data.unwrap());
                 return legacyData[levelID]; // return data if level is in old data
             }
         }
     }
 
     if (Backup::legacyFileExists()) {
-        log::warn("legacy file doesnt exist, loading legacy file backup temporarily (loading might be extremely slow, restart the game!)");
         if (auto data = file::readJson(Backup::getLegacyBackupDirPath())) {
-            putCachedLevel(levelID, data.unwrap());
-            if (const auto& legacyData = data.unwrap(); legacyData[levelID]["sessions"].isNull()){
+            const auto& legacyData = data.unwrap();
+            if (!legacyData[levelID]["sessions"].isNull()){
+                log::warn("legacy file doesnt exist, loading legacy file backup temporarily (loading might be extremely slow, restart the game!)");
+                putCachedLevel(levelID, data.unwrap());
                 return legacyData[levelID]; // return data if level is in old backup
             }
         }

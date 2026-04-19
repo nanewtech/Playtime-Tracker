@@ -23,7 +23,7 @@ $on_mod (Loaded){
 				oldSave = Mod::get()->getSaveDir() / "leveldata.backup";
 			}
 
-			if (!std::filesystem::exists(oldSave)) co_return false;
+			if (!std::filesystem::exists(oldSave)) co_return true; // nothing to convert
 
 			auto dataRaw = file::readJson(oldSave);
 			if (!dataRaw.isOk()) co_return false;
