@@ -1,4 +1,4 @@
-# v1.2.0
+# v1.2.1
 - made it so level data is now in a separate file for each level instead of one big file to prevent lag when saving / loading
 - added level cache to reduce unnecessary read operations when opening the menu popup
 - made loading the data asynchronous to prevent the game freezing while loading the menu popup
