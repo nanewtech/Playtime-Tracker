@@ -71,16 +71,20 @@ matjson::Value Data::getFile(std::string const& levelID) {
 
     if (Data::fileExists(levelID)) {
         if (auto data = file::readJson(getDataDirPath(levelID))) {
-            putCachedLevel(levelID, data.unwrap());
-            return data.unwrap();
+            if (!data.unwrap().isNull()) {
+                putCachedLevel(levelID, data.unwrap());
+                return data.unwrap();
+            }
         }
     }
     if (Backup::fileExists(levelID)) {
         log::info("{}.json doesn't exist, Loading backup!", levelID);
         Backup::loadBackup(levelID);
         auto data = Backup::getFile(levelID);
-        putCachedLevel(levelID, data);
-        return data;
+        if (!data.isNull()) {
+            putCachedLevel(levelID, data);
+            return data;
+        }
     }
 
     if (Data::legacyFileExists()) {
