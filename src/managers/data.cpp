@@ -232,12 +232,20 @@ int Data::getSessionPlaytimeRaw(std::string const& levelID) {
 
     auto& sessions = data["sessions"];
     auto& latestSession = sessions[sessions.size() - 1];
-
     time_t timestamp;
     if (Settings::getRemovePauses()) return getLatestSession(levelID);
 
-    auto& latestTime = latestSession[latestSession.size() - 1][0];
-    return latestTime.isNumber() ? time(&timestamp) - latestTime.asInt().unwrap() : playtime;
+    for (auto& currPair : latestSession) {
+        if (currPair.size() < 2) {
+            if (currPair[0].isNumber()) playtime += time(&timestamp) - currPair[0].asInt().unwrap();
+            continue;
+        }
+
+        if (!(currPair[0].isNumber() && currPair[1].isNumber())) continue;
+        playtime += currPair[1].asInt().unwrap() - currPair[0].asInt().unwrap();
+
+    }
+    return playtime;
 }
 
 // do this inside level
@@ -512,7 +520,7 @@ void Data::addSessionAttempts(std::string const& levelID, int newAttempts) {
     auto& attempts = data["attempts"];
     auto& latestAttempts = attempts[attempts.size() - 1];
 
-    if (!latestAttempts.isExactlyUInt()) return;
+    if (!latestAttempts.isNumber()) return;
 
 
     int count = latestAttempts.asInt().unwrap();
