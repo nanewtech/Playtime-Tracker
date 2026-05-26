@@ -1,6 +1,7 @@
 # v1.2.3
 - fixed an issue where attempts wouldn't get added to a session in certain cases
 - fixed an issue where in the pause menu the current sessions time wouldn't be displayed properly in certain cases
+- fixed an issue where closing out of a level could result in negative time
 # v1.2.2
 - fixed a typo where junk data would be created, preventing real data to ever be written
 # v1.2.1

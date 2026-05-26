@@ -62,7 +62,10 @@ class $modify(PTPlayLayer, PlayLayer) {
 
 	void levelComplete() {
 		Mod::get()->setSavedValue<bool>("is-paused", true);
-		
+		time_t timestamp = time(nullptr);
+
+		Mod::get()->setSavedValue<time_t>("pause-timestamp", timestamp);
+
 		Data::pauseLevel(m_fields->m_levelID);
 
 		PlayLayer::levelComplete();
