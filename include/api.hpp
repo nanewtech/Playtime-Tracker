@@ -24,6 +24,13 @@ namespace PlaytimeAPI {
     inline int getPlaytime(std::string const& levelID) GEODE_EVENT_EXPORT_NORES(&getPlaytime, (levelID));
 
     /**
+     * Returns the given playtime as a formated string
+     * @param playtime The playtime in seconds to be formated
+     * @return The playtime formated according to the users mod settings as a string
+     */
+    inline std::string formatPlaytime(int const playtime) GEODE_EVENT_EXPORT_NORES(&formatPlaytime, (playtime));
+
+    /**
      * Returns the attempts count of the specified level that playtime tracker counted
      * @param levelID The levelID of the level you want the attempts of.
      * Use the API's fortmatLevelID to have the correct formating
@@ -46,7 +53,7 @@ namespace PlaytimeAPI {
      * @param index Which session to get the playtime of, 0 being the oldest session
      * @return The sessions playtime in seconds or 0 if the level/session wasn't found
      */
-    inline int getSessionPlaytime(std::string const& levelID, const int index) GEODE_EVENT_EXPORT_NORES(&getSessionPlaytime, (levelID, index));
+    inline int getSessionPlaytime(std::string const& levelID, int const index) GEODE_EVENT_EXPORT_NORES(&getSessionPlaytime, (levelID, index));
 
     /**
      * Returns the amount of sessions with tracked attempts
@@ -63,7 +70,7 @@ namespace PlaytimeAPI {
      * @param index Which session to get the attempts of, 0 being the oldest session with tracked attempts
      * @return The session attempts or -1 if there are no tracked attempts for that session
      */
-    inline int getSessionAttempts(std::string const& levelID, const int index) GEODE_EVENT_EXPORT_NORES(&getSessionAttempts, (levelID, index));
+    inline int getSessionAttempts(std::string const& levelID, int const index) GEODE_EVENT_EXPORT_NORES(&getSessionAttempts, (levelID, index));
 
     /**
      * Returns the raw file data of the specified level

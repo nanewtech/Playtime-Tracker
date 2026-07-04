@@ -10,6 +10,10 @@ int PlaytimeAPI::getPlaytime(std::string const& levelID) {
     return Data::getTotalPlaytime(levelID);
 }
 
+std::string PlaytimeAPI::formatPlaytime(int const playtime) {
+    return Data::formattedPlaytime(playtime);
+}
+
 int PlaytimeAPI::getAttempts(std::string const &levelID) {
     return Data::getLevelAttempts(levelID);
 }
