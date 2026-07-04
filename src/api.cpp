@@ -22,6 +22,10 @@ int PlaytimeAPI::getSessionPlaytime(std::string const& levelID, const int index)
     return Data::getSessionPlaytimeRawAtIndex(levelID, index);
 }
 
+int PlaytimeAPI::getSessionAttemptsCount(std::string const &levelID) {
+    return Data::getSessionCount(levelID);
+}
+
 int PlaytimeAPI::getSessionAttempts(std::string const &levelID, const int index) {
     int offset = Data::getAttemptSessionCount(levelID) - Data::getSessionCount(levelID);
     return Data::getSessionAttemptsAtIndex(levelID, index + offset);
