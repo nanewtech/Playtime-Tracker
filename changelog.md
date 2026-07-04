@@ -1,3 +1,5 @@
+# v1.2.4
+- added an api interface to allow other mods to access your playtime / stats easier
 # v1.2.3
 - fixed an issue where attempts wouldn't get added to a session in certain cases
 - fixed an issue where in the pause menu the current sessions time wouldn't be displayed properly in certain cases

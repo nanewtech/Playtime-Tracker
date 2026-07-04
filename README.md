@@ -8,6 +8,23 @@ A mod to track your playtime on levels.
 
 Install through the geode mod index ingame :)
 
+### API Usage
+Add `nanew.playtime-tracker` to your mod dependencies to use the API
+```JSON
+{
+  "dependencies": {
+    "nanew.playtime-tracker": ">=1.2.4"
+  }
+}
+```
+And using it works like this:
+```cpp
+#include <nanew.playtime-tracker/include/api.hpp>
+
+std::string levelID = PlaytimeAPI::formatLevelID(12345, true);
+int playtime = PlaytimeAPI::getPlaytime(levelID);
+```
+check [the header file](include/api.hpp) for all functions
 ## planned features
 see [TODO](TODO.md)
 

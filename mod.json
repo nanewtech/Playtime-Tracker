@@ -8,12 +8,17 @@
 	},
 	"id": "nanew.playtime-tracker",
 	"name": "Playtime Tracker",
-	"version": "v1.2.3",
+	"version": "v1.2.4",
 	"developer": "nanew",
 	"description": "Track your playtime on levels!",
 	"dependencies": {
 		"geode.node-ids": ">=v1.22.0",
 		"cvolton.level-id-api": ">=2.0.0-beta.2"
+	},
+	"api": {
+		"include": [
+			"include/*.hpp"
+		]
 	},
 	"settings": {
 		"general-title":{

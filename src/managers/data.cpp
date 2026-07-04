@@ -2,7 +2,6 @@
 #include "settings.hpp"
 #include "backup.hpp"
 
-
 using namespace geode::prelude;
 
 std::unordered_set<std::string> playedIDs;
@@ -57,7 +56,7 @@ static void initializeFile(std::string const& levelID) {
     data["version"] = 2;
     data["linked"] = matjson::Value::array();
     data["sessions"] = matjson::Value::array();
-
+    data["attempts"] = matjson::Value::array();
 
 
     writeFile(data, levelID);
@@ -113,6 +112,7 @@ matjson::Value Data::getFile(std::string const& levelID) {
         data["version"] = 2;
         data["linked"] = matjson::Value::array();
         data["sessions"] = matjson::Value::array();
+        data["attempts"] = matjson::Value::array();
         putCachedLevel(levelID, data);
         initializeFile(levelID);
         return data;
