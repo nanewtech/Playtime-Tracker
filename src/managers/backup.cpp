@@ -1,21 +1,23 @@
 #include "backup.hpp"
 
+#include "asp/fs/fs.hpp"
+
 using namespace geode::prelude;
 
-static std::filesystem::path getBackupDirPath(std::string const& levelID) {
+static asp::fs::Path getBackupDirPath(std::string const& levelID) {
 	return Mod::get()->getSaveDir() / "data" / (levelID + ".backup");
 }
 
-std::filesystem::path Backup::getLegacyBackupDirPath() {
+asp::fs::Path Backup::getLegacyBackupDirPath() {
 	return Mod::get()->getSaveDir() / "leveldata.backup";
 }
 
 bool Backup::legacyFileExists() {
-	return std::filesystem::exists(getLegacyBackupDirPath());
+	return asp::fs::exists(getLegacyBackupDirPath());
 }
 
 bool Backup::fileExists(std::string const& levelID) {
-	return std::filesystem::exists(getBackupDirPath(levelID));
+	return asp::fs::exists(getBackupDirPath(levelID));
 }
 
 matjson::Value Backup::getFile(std::string const& levelID) {

@@ -13,5 +13,5 @@ public:
 	static void loadBackup(std::string const& levelID);
 
 	static bool legacyFileExists();
-	static std::filesystem::path getLegacyBackupDirPath();
+	static asp::fs::Path getLegacyBackupDirPath();
 };

@@ -1,6 +1,7 @@
 #include "data.hpp"
 #include "settings.hpp"
 #include "backup.hpp"
+#include "asp/fs/fs.hpp"
 
 using namespace geode::prelude;
 
@@ -13,20 +14,20 @@ typedef struct {
 
 std::unordered_map<std::string, cachedLevel> levelCache;
 
-std::filesystem::path getDataDirPath(std::string const& levelID) {
+asp::fs::Path getDataDirPath(std::string const& levelID) {
     return Mod::get()->getSaveDir() / "data" / (levelID + ".json");
 }
 
-std::filesystem::path getLegacyDataDirPath() {
+asp::fs::Path getLegacyDataDirPath() {
     return Mod::get()->getSaveDir() / "leveldata.json";
 }
 
 bool Data::fileExists(std::string const& levelID) {
-    return std::filesystem::exists(getDataDirPath(levelID));
+    return asp::fs::exists(getDataDirPath(levelID));
 }
 
 bool Data::legacyFileExists() {
-    return std::filesystem::exists(getLegacyDataDirPath());
+    return asp::fs::exists(getLegacyDataDirPath());
 }
 
 void putCachedLevel(std::string const& levelID, matjson::Value const& data) {
