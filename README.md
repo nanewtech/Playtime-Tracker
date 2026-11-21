@@ -19,7 +19,7 @@ Add `nanew.playtime-tracker` to your mod dependencies to use the API
 ```
 And using it works like this:
 ```cpp
-#include <nanew.playtime-tracker/include/api.hpp>
+#include <nanew.playtime-tracker/api.hpp>
 
 std::string levelID = PlaytimeAPI::formatLevelID(12345, true);
 int playtime = PlaytimeAPI::getPlaytime(levelID);

@@ -4,7 +4,7 @@
 #include <Geode/ui/GeodeUI.hpp>
 #include <arc/task/Yield.hpp>
 
-#include <cvolton.level-id-api/include/EditorIDs.hpp>
+#include <cvolton.level-id-api/EditorIDs.hpp>
 
 #include "../managers/data.hpp"
 #include "../managers/settings.hpp"
