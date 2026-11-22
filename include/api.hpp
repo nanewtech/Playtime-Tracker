@@ -80,5 +80,5 @@ namespace PlaytimeAPI {
      * @note Read the code in the data manager on GitHub or look at the JSON files to see
      * the format / structure of the data
      */
-    GEODE_EVENT_EXPORT(geode::Result<int>, getRawLevelData, (std::string const& levelID), (levelID));
+    GEODE_EVENT_EXPORT(geode::Result<matjson::Value>, getRawLevelData, (std::string const& levelID), (levelID));
 }
