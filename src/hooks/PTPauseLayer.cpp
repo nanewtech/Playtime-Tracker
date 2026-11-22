@@ -40,8 +40,13 @@ class $modify(PTPauseLayer, PauseLayer) {
 
 		if (!Settings::getEnablePauseButton()) return;
 
-		auto leftMenu = this->getChildByID("left-button-menu");
-		auto rightMenu = this->getChildByID("right-button-menu");
+		// thank you claude for adding a random menu to pause layer???
+		// literally what are we doing bro this pissed me off im so serious bro shoutout anthropic W tokens
+		// thanks geode devs for working through this shitty update :pray:
+		auto mainLayer = this->getChildByID("main-layer");
+
+		auto leftMenu = mainLayer->getChildByID("left-button-menu");
+		auto rightMenu = mainLayer->getChildByID("right-button-menu");
 		ptButton->setID("playtime-tracker-button");
 
 		if (Settings::getPauseLayerPosition() == "Right") {
