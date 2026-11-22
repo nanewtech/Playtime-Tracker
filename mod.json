@@ -13,7 +13,7 @@
 	"description": "Track your playtime on levels!",
 	"dependencies": {
 		"geode.node-ids": ">=v1.22.0",
-		"cvolton.level-id-api": ">=2.0.0-beta.2"
+		"cvolton.level-id-api": ">=2.1.0"
 	},
 	"api": {
 		"include": [
@@ -154,7 +154,7 @@
 	"issues": {
 		"url": "https://github.com/nanewtech/Playtime-Tracker/issues",
 		"info": "Please report any bugs/crashes etc. on the repository or discord with an issue/forum post! Additionally, you can send me a dm on discord: @nanewtech"},
-	"tags": ["offline", "utility"],
+	"tags": ["offline", "utility", "api"],
 	"resources": {
 		"sprites": [
 			"resources/clock.png"
