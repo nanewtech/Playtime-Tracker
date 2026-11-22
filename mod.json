@@ -62,7 +62,7 @@
 			"type": "string",
 			"name": "Menu button position",
 			"description": "Decide if the button on the level info page should appear above the favorites or on the left side of the screen. <cr>CHOOSING BOTTOM CAN LEAD TO VISUAL ISSUES (OVERLAPPING BUTTONS)!</c>",
-			"one-of": ["Bottom", "Left"],
+			"one-of": ["Right", "Left"],
 			"default": "Left"
 		},
 		"enable-pause-button": {

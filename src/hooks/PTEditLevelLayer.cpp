@@ -25,6 +25,10 @@ class $modify(PTEditLevelLayer, EditLevelLayer) {
 		clockSprite->setPosition(buttonSprite->getContentSize() / 2);
 		buttonSprite->addChild(clockSprite);
 
+		float spriteScale = Settings::getInfoLayerPosition() == "Left" ? .6f : .8f;
+
+			buttonSprite->setScale(spriteScale);
+
 		// auto sprite = CircleButtonSprite::createWithSprite("clock.png"_spr);
 		// auto sprite = CCSprite::create("playtimeButton.png"_spr);
 		auto playtimeButton = CCMenuItemSpriteExtra::create(
@@ -34,7 +38,7 @@ class $modify(PTEditLevelLayer, EditLevelLayer) {
 		);
 
 
-		auto infoButtonMenu = this->getChildByID("info-button-menu");
+		auto leftButtonMenu = this->getChildByID("level-actions-menu");
 		auto folderMenu = this->getChildByID("folder-menu");
 
 		playtimeButton->setID("playtime-tracker-button");
@@ -45,21 +49,11 @@ class $modify(PTEditLevelLayer, EditLevelLayer) {
 		
 		playtimeButton->setZOrder(1);
 
-		if (Settings::getInfoLayerPosition() == "Bottom") {
-
-			buttonSprite->setScale(0.75f);
-
-			float x = 34.5f;
-			float y = infoButtonMenu->getChildByID("settings-button")->getPositionY();
-
-			playtimeButton->setPosition({ x, y });
-
-			infoButtonMenu->addChild(playtimeButton);
-			infoButtonMenu->updateLayout();
+		if (Settings::getInfoLayerPosition() == "Left") {
+			leftButtonMenu->addChild(playtimeButton);
+			leftButtonMenu->updateLayout();
 		}
 		else {
-			buttonSprite->setScale(0.8f);
-
 			folderMenu->addChild(playtimeButton);
 			folderMenu->updateLayout();
 		}
