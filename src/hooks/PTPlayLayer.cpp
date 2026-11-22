@@ -5,7 +5,6 @@
 #include <cvolton.level-id-api/EditorIDs.hpp>
 
 #include "../managers/data.hpp"
-#include "../managers/backup.hpp"
 #include "../managers/settings.hpp"
 
 using namespace geode::prelude;
@@ -15,8 +14,8 @@ class $modify(PTPlayLayer, PlayLayer) {
 	struct Fields {
 	std::string m_levelID;
 	};
-	bool init(GJGameLevel* level, bool useReplay, bool dontCreateObjects) {
-		if (!PlayLayer::init(level, useReplay, dontCreateObjects)) {
+	bool init(GJGameLevel* level, bool dontCreateObjects) {
+		if (!PlayLayer::init(level, dontCreateObjects)) {
 			return false;
 		}
 		time_t timestamp;

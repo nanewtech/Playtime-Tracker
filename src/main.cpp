@@ -2,6 +2,7 @@
 #include <Geode/utils/async.hpp>
 #include <arc/task/Yield.hpp>
 
+#include "asp/fs/fs.hpp"
 #include "managers/data.hpp"
 
 using namespace geode::prelude;
@@ -19,11 +20,11 @@ $on_mod (Loaded){
 			// fetch data
 			if (!file::createDirectory(newPath).isOk()) co_return false;
 			auto oldSave = Mod::get()->getSaveDir() / "leveldata.json";
-			if (!std::filesystem::exists(oldSave)) {
+			if (!asp::fs::exists(oldSave)) {
 				oldSave = Mod::get()->getSaveDir() / "leveldata.backup";
 			}
 
-			if (!std::filesystem::exists(oldSave)) co_return true; // nothing to convert
+			if (!asp::fs::exists(oldSave)) co_return true; // nothing to convert
 
 			auto dataRaw = file::readJson(oldSave);
 			if (!dataRaw.isOk()) co_return false;
