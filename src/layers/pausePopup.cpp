@@ -23,16 +23,16 @@ bool PausePopup::init(std::string const& levelID) {
     bg->setPosition({ 10.f,10.f });
     m_mainLayer->addChild(bg);
 
-    auto playtimeTitle = CCLabelBMFont::create("Current session:", "goldFont.fnt");
+    const auto playtimeTitle = geode::Label::create("Current session:", "goldFont.fnt");
     playtimeTitle->setScale(0.75f);
-    auto totalTitle = CCLabelBMFont::create("Total Playtime:", "goldFont.fnt");
+    const auto totalTitle = geode::Label::create("Total Playtime:", "goldFont.fnt");
     totalTitle->setScale(0.75f);
 
 
     // auto totalPlaytime = Data::getPlaytimeRaw(levelID);
-    auto totalLabel = CCLabelBMFont::create(Data::formattedPlaytime(Data::getTotalPlaytime(levelID)).c_str(), "bigFont.fnt");
+    auto totalLabel = geode::Label::create(Data::formattedPlaytime(Data::getTotalPlaytime(levelID)), "bigFont.fnt");
     auto playtime = Data::getSessionPlaytimeRaw(levelID);
-    auto playtimeLabel = CCLabelBMFont::create(Data::formattedPlaytime(playtime).c_str() , "bigFont.fnt");
+    auto playtimeLabel = geode::Label::create(Data::formattedPlaytime(playtime) , "bigFont.fnt");
     playtimeLabel->setScale(0.375f);
     totalLabel->setScale(0.375f);
 
@@ -84,9 +84,9 @@ void PausePopup::update(float delta) {
     deltaAccumulator += delta;
 
     if (deltaAccumulator >= 1.f) {
-        m_totalLabel->setCString(Data::formattedPlaytime(Data::getTotalPlaytime(m_levelID)).c_str());
+        m_totalLabel->setText(std::move(Data::formattedPlaytime(Data::getTotalPlaytime(m_levelID))));
         auto playtime = Data::getSessionPlaytimeRaw(m_levelID);
-        m_playtimeLabel->setCString(Data::formattedPlaytime(playtime).c_str());
+        m_playtimeLabel->setText(std::move(Data::formattedPlaytime(playtime)));
         m_content->updateLayout();
         deltaAccumulator = 0.f;
     }

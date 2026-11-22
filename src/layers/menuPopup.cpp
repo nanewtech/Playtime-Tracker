@@ -20,10 +20,10 @@ class OpenAttempts : public CCLayer {
 public:
     void open(CCObject* sender) {
 
-        auto obj = static_cast<CCNode*>(sender)->getUserObject("level-id");
-        std::string levelID = static_cast<CCString*>(obj)->getCString();
+        auto obj = typeinfo_cast<CCNode*>(sender)->getUserObject("level-id");
+        std::string levelID = typeinfo_cast<CCString*>(obj)->getCString();
 
-        auto levelObj = static_cast<CCNode*>(sender)->getUserData();
+        auto levelObj = typeinfo_cast<CCNode*>(sender)->getUserData();
         auto level = static_cast<GJGameLevel*>(levelObj);
 
         int gameAttempts = level->m_attempts.value();
@@ -56,7 +56,7 @@ bool MenuPopup::init(GJGameLevel* level) {
 
     std::string levelName = level->m_levelName;
 
-    auto subtitleLabel = CCLabelBMFont::create(fmt::format("{} - Sessions: {}", levelName, Data::getSessionCount(levelID)).c_str(), "goldFont.fnt");
+    auto subtitleLabel = geode::Label::create(fmt::format("{} - Sessions: {}", levelName, Data::getSessionCount(levelID)), "goldFont.fnt");
     subtitleLabel->setScale(0.5f);
     subtitleLabel->setPosition({150.f, 233.f});
 
@@ -104,7 +104,7 @@ bool MenuPopup::init(GJGameLevel* level) {
     throbber->setZOrder(2000);
     throbber->setPosition({ -145.f,-50.f }); // -148 -37
 
-    auto loadingLabel = CCLabelBMFont::create("Loading data", "goldFont.fnt");
+    auto loadingLabel = geode::Label::create("Loading data", "goldFont.fnt");
     loadingLabel->setScale(0.75f);
     loadingLabel->setPosition({ 140.f,60.f }); // 138 73
     loadingLabel->setID("pt-loading-label");
@@ -148,7 +148,7 @@ bool MenuPopup::init(GJGameLevel* level) {
                         m_scrollLayer->m_contentLayer->removeAllChildrenWithCleanup(true);
                         initContentLayer(m_scrollLayer->m_contentLayer);
 
-                        auto noSessionLabel = CCLabelBMFont::create("No sessions yet!", "bigFont.fnt");
+                        auto noSessionLabel = geode::Label::create("No sessions yet!", "bigFont.fnt");
                         noSessionLabel->setScale(0.35f);
 
                         m_scrollLayer->m_contentLayer->addChild(noSessionLabel);
@@ -265,11 +265,11 @@ void MenuPopup::update(float delta) {
     }
     if (done) {
         auto sessionCount = Data::getSessionCount(m_levelID);
-        m_scrollLayer->m_contentLayer->setContentSize({ 265.f, 180.f + 45.f * (sessionCount) });
+        m_scrollLayer->m_contentLayer->setContentSize({ 265.f, 180.f + 45.f * static_cast<float>(sessionCount)});
 
         if (m_scrollLayer->m_contentLayer->getContentHeight() < 196.f) m_scrollLayer->m_contentLayer->setContentSize({ 265.f, 196.f});
 
-        auto noSessionLabel = CCLabelBMFont::create("No sessions yet!", "bigFont.fnt");
+        auto noSessionLabel = geode::Label::create("No sessions yet!", "bigFont.fnt");
         noSessionLabel->setScale(0.35f);
 
         if (sessionCount == 0) m_scrollLayer->m_contentLayer->addChild(noSessionLabel);
@@ -287,15 +287,15 @@ void MenuPopup::update(float delta) {
 }
 
 void MenuPopup::initContentLayer(CCContentLayer* content) {
-    auto totalTitle = CCLabelBMFont::create("Total Playtime:", "goldFont.fnt");
-    auto totalValue = CCLabelBMFont::create(Data::formattedPlaytime(Data::getPlaytimeRaw(m_levelID)).c_str(), "bigFont.fnt");
-    auto sessionTitle = CCLabelBMFont::create("Last Session:", "goldFont.fnt");
-    auto sessionValue = CCLabelBMFont::create(Data::formattedPlaytime(Data::getLatestSession(m_levelID)).c_str(), "bigFont.fnt");
+    auto totalTitle = geode::Label::create("Total Playtime:", "goldFont.fnt");
+    auto totalValue = geode::Label::create(Data::formattedPlaytime(Data::getPlaytimeRaw(m_levelID)), "bigFont.fnt");
+    auto sessionTitle = geode::Label::create("Last Session:", "goldFont.fnt");
+    auto sessionValue = geode::Label::create(Data::formattedPlaytime(Data::getLatestSession(m_levelID)), "bigFont.fnt");
 
     totalTitle->setScale(0.75f);
-    totalValue->limitLabelWidth(300.f, .35f, .1f);
+    totalValue->setLimitLabelWidth(300.f, .35f, .1f);
     sessionTitle->setScale(0.75f);
-    sessionValue->limitLabelWidth(300.f, .35f, .1f);
+    sessionValue->setLimitLabelWidth(300.f, .35f, .1f);
 
     content->addChild(totalTitle);
     content->addChild(totalValue);
@@ -307,17 +307,17 @@ void MenuPopup::initContentLayer(CCContentLayer* content) {
     std::string timeSessionsStat = Data::formattedPlaytime(Data::getPlaytimeRaw(m_levelID));
     if (Data::getSessionCount(m_levelID) != 0) timeSessionsStat = Data::formattedPlaytime(Data::getPlaytimeRaw(m_levelID) / Data::getSessionCount(m_levelID));
 
-    auto statsLabel = CCLabelBMFont::create("Level Stats", "goldFont.fnt");
-    auto lastPlayedLabel = CCLabelBMFont::create("Last Played: Never", "bigFont.fnt");
-    if (Data::getSessionCount(m_levelID) > 0) lastPlayedLabel = CCLabelBMFont::create(fmt::format("Last Played: {}", Data::getPlayedFormatted(Data::getLastPlayedRaw(m_levelID))).c_str(), "bigFont.fnt");
-    auto timeAttemptLabel = CCLabelBMFont::create(fmt::format("Time/Attempt: {}", timeAttemptStat).c_str(), "bigFont.fnt");
-    auto timeSessionsLabel = CCLabelBMFont::create(fmt::format("Time/Session: {}", timeSessionsStat).c_str(), "bigFont.fnt");
+    auto statsLabel = geode::Label::create("Level Stats", "goldFont.fnt");
+    auto lastPlayedLabel = geode::Label::create("Last Played: Never", "bigFont.fnt");
+    if (Data::getSessionCount(m_levelID) > 0) lastPlayedLabel = geode::Label::create(fmt::format("Last Played: {}", Data::getPlayedFormatted(Data::getLastPlayedRaw(m_levelID))), "bigFont.fnt");
+    auto timeAttemptLabel = geode::Label::create(fmt::format("Time/Attempt: {}", timeAttemptStat), "bigFont.fnt");
+    auto timeSessionsLabel = geode::Label::create(fmt::format("Time/Session: {}", timeSessionsStat), "bigFont.fnt");
 
     statsLabel->setScale(0.75f);
 
-    lastPlayedLabel->limitLabelWidth(650.f, .35f, .1f);
-    timeAttemptLabel->limitLabelWidth(650.f, .3f, .1f);
-    timeSessionsLabel->limitLabelWidth(650.f, .3f, .1f);
+    lastPlayedLabel->setLimitLabelWidth(650.f, .35f, .1f);
+    timeAttemptLabel->setLimitLabelWidth(650.f, .3f, .1f);
+    timeSessionsLabel->setLimitLabelWidth(650.f, .3f, .1f);
 
     content->addChild(statsLabel);
     content->addChild(lastPlayedLabel);
@@ -326,7 +326,7 @@ void MenuPopup::initContentLayer(CCContentLayer* content) {
 
 
     //sessions
-    auto sessionLabel = CCLabelBMFont::create("Sessions", "goldFont.fnt");
+    auto sessionLabel = geode::Label::create("Sessions", "goldFont.fnt");
     sessionLabel->setScale(0.75f);
     content->addChild(sessionLabel);
 }
@@ -341,13 +341,13 @@ CCMenu* MenuPopup::sessionMenuElement() {
     auto menu = CCMenu::create();
     menu->setContentSize({ 265.f, 40.f });
     menu->setTag(index);
-    auto sessionTitle = CCLabelBMFont::create(currSession.sessionTitle.c_str(), "bigFont.fnt");
-    auto sessionPlaytime = CCLabelBMFont::create(currSession.playtime.c_str(), "bigFont.fnt");
+    auto sessionTitle = geode::Label::create(currSession.sessionTitle, "bigFont.fnt");
+    auto sessionPlaytime = geode::Label::create(currSession.playtime, "bigFont.fnt");
 
 
     // value to offset index in case attempt sessions count is less than time session count (if you played a level update v1.1.0)
 
-    auto sessionAttempts = CCLabelBMFont::create(currSession.attempts.c_str(), "bigFont.fnt");
+    auto sessionAttempts = geode::Label::create(currSession.attempts, "bigFont.fnt");
 
     auto deleteSprite = CCSprite::createWithSpriteFrameName("GJ_trashBtn_001.png");
 
@@ -381,16 +381,16 @@ CCMenu* MenuPopup::sessionMenuElement() {
     deleteSessionButton->setUserObject("level-id", CCString::create(m_levelID));
 
     sessionTitle->setPosition({ 0.f,40.f });
-    sessionTitle->limitLabelWidth(600.f, .35f, .1f);
+    sessionTitle->setLimitLabelWidth(600.f, .35f, .1f);
     sessionTitle->setAnchorPoint({ 0.f,1.f });
 
     sessionPlaytime->setPosition({ 10.f,15.f });
-    sessionPlaytime->limitLabelWidth(600.f, .35f, .1f);
+    sessionPlaytime->setLimitLabelWidth(600.f, .35f, .1f);
     sessionPlaytime->setAnchorPoint({ 0.f,0.f });
     sessionPlaytime->setColor({200, 200, 200});
 
     sessionAttempts->setPosition({ 10.f,0.f });
-    sessionAttempts->limitLabelWidth(600.f, .35f, .1f);
+    sessionAttempts->setLimitLabelWidth(600.f, .35f, .1f);
     sessionAttempts->setAnchorPoint({0.f, 0.f});
     sessionAttempts->setColor({200, 200, 200});
 

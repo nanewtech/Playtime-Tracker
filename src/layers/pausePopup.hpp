@@ -7,12 +7,12 @@ using namespace geode::prelude;
 
 class PausePopup : public geode::Popup {
 protected:
-	std::string m_levelID;
-	float deltaAccumulator = 0.f;
+	std::string m_levelID{};
+	float deltaAccumulator{0.f};
 
-	CCLabelBMFont* m_totalLabel;
-	CCLabelBMFont* m_playtimeLabel;
-	GenericContentLayer* m_content;
+	Label* m_totalLabel{nullptr};
+	Label* m_playtimeLabel{nullptr};
+	GenericContentLayer* m_content{nullptr};
 
 	bool init(std::string const& levelID);
 public:
