@@ -1,3 +1,6 @@
+# v1.2.5
+- updated to gd 2.2091
+- changed alignment in Editor levels from Left/Bottom to Left/Right
 # v1.2.4
 - added an api interface to allow other mods to access your playtime / stats easier
 - fixed a minor issue with initiating level data
