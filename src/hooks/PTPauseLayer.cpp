@@ -29,8 +29,8 @@ class $modify(PTPauseLayer, PauseLayer) {
 		clockSprite->setPosition(buttonSprite->getContentSize() / 2);
 		buttonSprite->addChild(clockSprite);
 		// auto sprite = CCSprite::create("playtimeButton.png"_spr);
-		buttonSprite->setScale(0.8f);
-		if (Settings::getPauseLayerPosition() == "Right") buttonSprite->setScale(0.65f);
+		buttonSprite->setScale(0.59f);
+		if (Settings::getPauseLayerPosition() == "Right") buttonSprite->setScale(0.58f);
 
 		auto ptButton = CCMenuItemSpriteExtra::create(
 			buttonSprite,
