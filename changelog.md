@@ -1,5 +1,5 @@
 # v1.2.5
-- updated to gd 2.2091
+- ported to gd 2.2091
 - changed alignment in Editor levels from Left/Bottom to Left/Right
 - adjust to button scaling to rob in all menus
 # v1.2.4
